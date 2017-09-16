@@ -2,11 +2,11 @@
 
 import json
 import re
-import subprocess
 import urllib
 import base64
 import time
 
+import os, glob
 import web
 import gv  # Get access to SIP's settings
 from urls import urls  # Get access to SIP's URLs
@@ -31,14 +31,22 @@ gv.plugin_menu.append(['Manage Plugins', '/plugins'])
 def get_permissions():
     global installed
     try:
-        permissions = []
-        files = subprocess.check_output(['ls', 'plugins'])
-        installed = [f for f in list(files.split('\n')) if re.match('[^_].+\.py$', f)]
-        pm = installed.index('plugin_manager.py')
-        del installed[pm] #  Remove this plugin from list
-        for p in installed:
-            mod = subprocess.check_output(['stat', '-c %a', 'plugins/'+p])
-            permissions.append(int(list(mod.strip())[1])%2)
+        files = glob.glob('plugins/[!_]*.py') #ignore files with "_" prefix
+        pm = files.index(os.path.join('plugins','plugin_manager.py'))
+        del files[pm] #  Remove the manager plugin from list
+        #permissions is a parallel array containind either a 1 or 0 for each plugin
+        permissions = [1 if os.access(f,os.X_OK) else 0 for f in files]
+        #need to remove the "plugins/" path prefix from the file name
+        installed = [f[len('plugins')+len(os.sep):] for f in files]
+#        permissions = []
+#        for f in files:
+#            if os.access(f,os.X_OK):
+#                permissions.append(1)
+#            else :
+#                permissions.append(0)
+#        installed = [] #gotta remove plugins + os.sep
+#        for f in files:
+#           installed.append(f[len("plugins")+len(os.sep):])
         settings = dict(zip(installed, permissions))
         return settings
     except IOError:
@@ -100,12 +108,12 @@ class update_plugins(ProtectedPage):
         print 'qdict: ', qdict
         if qdict['btnId'] =="upd":
             for f in installed:
+                fName = 'plugins/' + f
+                i_mode = os.stat(fName).st_mode #mode bits XX...rwxrwxrwx
                 if f in qdict:
-                    command = 'chmod g+x plugins/'+f
-                    subprocess.call(command.split())
+                    os.chmod(fName, i_mode | 8) #enable group execute bit3 chmod g+x 
                 else:
-                    command = 'chmod g-x plugins/'+f
-                    subprocess.call(command.split())
+                    os.chmod(fName, i_mode & ~8) #disable group execute bit3 chmod g-x
                 time.sleep(1)
 #            restart(1, True)
 #            return template_render.restarting('/')
@@ -122,11 +130,8 @@ class update_plugins(ProtectedPage):
                     victim = f.split()
                     if victim[0][-3:] == ".py":
                         b_code = victim[0].replace('.py', '.pyc')
-                        command = 'rm -f '+victim[1]+'/'+b_code
-                        subprocess.call(command.split())
-                    command = 'rm -f '+victim[1]+'/'+victim[0]
-#                    print 'command: ', command
-                    subprocess.call(command.split())
+                        os.remove(victim[1]+'/'+b_code)
+                    os.remove(victim[1]+'/'+victim[0])
 #            restart(1, True)
 #            return template_render.restarting('/')
             raise web.seeother('/restart')

@@ -113,7 +113,7 @@ plugin_menu = []  # Empty list of lists for plugin links (e.g. ['name', 'URL'])
 
 srvals = [0] * (sd['nst'])  # Shift Register values
 output_srvals = [0] * (sd['nst'])  # Shift Register values last set by set_output()
-output_srvals_lock = RLock()
+output_srvals_lock = RLock()  # Safe threading access when setting state of relays
 rovals = [0] * sd['nbrd'] * 7  # Run Once durations
 snames = station_names()  # Load station names from file
 pd = load_programs()  # Load program data from file
