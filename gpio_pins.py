@@ -6,6 +6,7 @@ try:
     import RPi.GPIO as GPIO
     gv.platform = 'pi'
     rev = GPIO.RPI_REVISION
+    #map header connector pins to gpio names/nums
     if rev == 1:
         # map 26 physical pins (1based) with 0 for pins that do not have a gpio number
         if gv.use_pigpio:

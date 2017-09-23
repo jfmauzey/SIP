@@ -82,7 +82,8 @@ sd = {
     u"lang": u"default",
     u"idd": 0,
     u"pigpio": 0,
-    u"alr":0
+    u"alr":0,
+    u"srt": u"default"
 }
 
 try:
