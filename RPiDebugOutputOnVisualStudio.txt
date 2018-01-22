@@ -1,0 +1,140 @@
+The following output was copied from the "Output" window when running
+on rpi with the ptvsd module sending the debug info back to Visual Studio.
+The SIP application dies when ptvsd is used to debug.
+
+This debug engine does not support exception conditions. The condition(s) will be ignored.
+Standard library module invoked user code during import; breakpoints disabled for invoked code.
+Standard library module invoked user code during import; breakpoints disabled for invoked code.
+Standard library module invoked user code during import; breakpoints disabled for invoked code.
+Standard library module invoked user code during import; breakpoints disabled for invoked code.
+Standard library module invoked user code during import; breakpoints disabled for invoked code.
+Standard library module invoked user code during import; breakpoints disabled for invoked code.
+ImportError: No module named google
+
+ImportError: No module named openid.consumer.consumer
+
+subprocess.CalledProcessError: Command '['git', 'rev-list', '--count', 'HEAD']' returned non-zero exit status 128
+
+Could not use git to determine version!
+Creating bbsr ValveController
+ptvsd.AttachAlreadyEnabledError: ptvsd.enable_attach() has already been called in this process.
+
+Ignoring exception while loading the system_update plug-in.
+ptvsd.enable_attach() has already been called in this process.
+ptvsd.AttachAlreadyEnabledError: ptvsd.enable_attach() has already been called in this process.
+
+Ignoring exception while loading the plugin_manager plug-in.
+ptvsd.enable_attach() has already been called in this process.
+ALARM from Example_Sender!: Just and example!
+ptvsd.AttachAlreadyEnabledError: ptvsd.enable_attach() has already been called in this process.
+
+Ignoring exception while loading the mobile_app plug-in.
+ptvsd.enable_attach() has already been called in this process.
+ptvsd.AttachAlreadyEnabledError: ptvsd.enable_attach() has already been called in this process.
+
+Ignoring exception while loading the proto plug-in.
+ptvsd.enable_attach() has already been called in this process.
+ptvsd.AttachAlreadyEnabledError: ptvsd.enable_attach() has already been called in this process.
+
+Ignoring exception while loading the relay_board plug-in.
+ptvsd.enable_attach() has already been called in this process.
+plugins loaded:
+  signaling_examples
+ValueError: ['Manage Plugins', '/plugins'] is not in list
+
+Starting timing loop
+
+zones changed
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+http://0.0.0.0:9080/
+socket.timeout: timed out
+
+ptvsd.AttachAlreadyEnabledError: ptvsd.enable_attach() has already been called in this process.
+
+socket.timeout: timed out
+
+Traceback (most recent call last):
+  File "/home/John/SIP/web/application.py", line 237, in process
+    return p(lambda: process(processors))
+  File "/home/John/SIP/web/application.py", line 568, in processor
+    h()
+  File "/home/John/SIP/web/application.py", line 77, in reload_mapping
+    mod = __import__(module_name, None, None, [''])
+  File "/home/John/SIP/sip.py", line 5, in <module>
+    ptvsd.enable_attach('keys2kingdom')
+  File "/usr/local/lib/python2.7/dist-packages/ptvsd/__init__.py", line 87, in enable_attach
+    return _attach_server().enable_attach(secret, address, certfile, keyfile, redirect_output)
+  File "/usr/local/lib/python2.7/dist-packages/ptvsd/attach_server.py", line 102, in enable_attach
+    raise ptvsd.AttachAlreadyEnabledError('ptvsd.enable_attach() has already been called in this process.')
+AttachAlreadyEnabledError: ptvsd.enable_attach() has already been called in this process.
+
+web.webapi._InternalError: 500 Internal Server Error
+
+Traceback (most recent call last):
+  File "/home/John/SIP/web/application.py", line 237, in process
+    return p(lambda: process(processors))
+  File "/home/John/SIP/web/application.py", line 568, in processor
+    h()
+  File "/home/John/SIP/web/application.py", line 77, in reload_mapping
+    mod = __import__(module_name, None, None, [''])
+  File "/home/John/SIP/sip.py", line 5, in <module>
+    ptvsd.enable_attach('keys2kingdom')
+  File "/usr/local/lib/python2.7/dist-packages/ptvsd/__init__.py", line 87, in enable_attach
+    return _attach_server().enable_attach(secret, address, certfile, keyfile, redirect_output)
+  File "/usr/local/lib/python2.7/dist-packages/ptvsd/attach_server.py", line 102, in enable_attach
+    raise ptvsd.AttachAlreadyEnabledError('ptvsd.enable_attach() has already been called in this process.')
+AttachAlreadyEnabledError: ptvsd.enable_attach() has already been called in this process.
+
+Traceback (most recent call last):
+  File "/home/John/SIP/web/application.py", line 237, in process
+    return p(lambda: process(processors))
+  File "/home/John/SIP/web/application.py", line 568, in processor
+    h()
+  File "/home/John/SIP/web/application.py", line 77, in reload_mapping
+    mod = __import__(module_name, None, None, [''])
+  File "/home/John/SIP/sip.py", line 5, in <module>
+    ptvsd.enable_attach('keys2kingdom')
+  File "/usr/local/lib/python2.7/dist-packages/ptvsd/__init__.py", line 87, in enable_attach
+    return _attach_server().enable_attach(secret, address, certfile, keyfile, redirect_output)
+  File "/usr/local/lib/python2.7/dist-packages/ptvsd/attach_server.py", line 102, in enable_attach
+    raise ptvsd.AttachAlreadyEnabledError('ptvsd.enable_attach() has already been called in this process.')
+AttachAlreadyEnabledError: ptvsd.enable_attach() has already been called in this process.
+
+Traceback (most recent call last):
+  File "/home/John/SIP/web/application.py", line 237, in process
+    return p(lambda: process(processors))
+  File "/home/John/SIP/web/application.py", line 568, in processor
+    h()
+  File "/home/John/SIP/web/application.py", line 77, in reload_mapping
+    mod = __import__(module_name, None, None, [''])
+  File "/home/John/SIP/sip.py", line 5, in <module>
+    ptvsd.enable_attach('keys2kingdom')
+  File "/usr/local/lib/python2.7/dist-packages/ptvsd/__init__.py", line 87, in enable_attach
+    return _attach_server().enable_attach(secret, address, certfile, keyfile, redirect_output)
+  File "/usr/local/lib/python2.7/dist-packages/ptvsd/attach_server.py", line 102, in enable_attach
+    raise ptvsd.AttachAlreadyEnabledError('ptvsd.enable_attach() has already been called in this process.')
+AttachAlreadyEnabledError: ptvsd.enable_attach() has already been called in this process.
+
+Traceback (most recent call last):
+  File "/home/John/SIP/web/application.py", line 237, in process
+    return p(lambda: process(processors))
+  File "/home/John/SIP/web/application.py", line 568, in processor
+    h()
+  File "/home/John/SIP/web/application.py", line 77, in reload_mapping
+    mod = __import__(module_name, None, None, [''])
+  File "/home/John/SIP/sip.py", line 5, in <module>
+    ptvsd.enable_attach('keys2kingdom')
+  File "/usr/local/lib/python2.7/dist-packages/ptvsd/__init__.py", line 87, in enable_attach
+    return _attach_server().enable_attach(secret, address, certfile, keyfile, redirect_output)
+  File "/usr/local/lib/python2.7/dist-packages/ptvsd/attach_server.py", line 102, in enable_attach
+    raise ptvsd.AttachAlreadyEnabledError('ptvsd.enable_attach() has already been called in this process.')
+AttachAlreadyEnabledError: ptvsd.enable_attach() has already been called in this process.
+
+#########
+#End of Debug Output
+#########
+
+#####################################
+Additional Info from Visual Studio
+
+

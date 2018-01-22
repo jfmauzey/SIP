@@ -6,8 +6,9 @@ import os
 import stat
 from os.path import dirname, join, split, splitext
 
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-
+#add parent directory to resolve intra-pkg references
+if not os.path.join(sys.path[0],'..') in sys.path:
+    sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 def isidentifier(s):  # to make this work with Python 2.7.
     if s in keyword.kwlist:
@@ -20,7 +21,7 @@ os_name = os.name
 __all__ = []
 for name in glob(join(basedir, '*.py')):
     module = splitext(split(name)[-1])[0]
-    if not module.startswith('_') and isidentifier(module) and not keyword.iskeyword(module):
+    if not module.startswith('_') and isidentifier(module) and not keyword.iskeyword(module) and module != 'relay_board':
         if os_name == "posix":
             st = os.stat(name)
             if bool(st.st_mode & stat.S_IXGRP) or module == 'mobile_app' or module == 'plugin_manager':  # Load plugin if group permission is executable.

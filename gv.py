@@ -4,42 +4,36 @@
 
 ##############################
 #### Revision information ####
-import subprocess
-from threading import RLock
+major_ver = None
+minor_ver = None
+old_count = None
+ver_str = None
+ver_date = None
 
-major_ver = 3
-minor_ver = 2
-old_count = 747
-
-try:
-    revision = int(subprocess.check_output(['git', 'rev-list', '--count', 'HEAD']))
-    ver_str = '%d.%d.%d' % (major_ver, minor_ver, (revision - old_count))
-except Exception:
-    print _('Could not use git to determine version!')
-    revision = 999
-    ver_str = '%d.%d.%d' % (major_ver, minor_ver, revision)
-
-try:
-    ver_date = subprocess.check_output(['git', 'log', '-1', '--format=%cd', '--date=short']).strip()
-except Exception:
-    print _('Could not use git to determine date of last commit!')
-    ver_date = '2015-01-09'
+def set_sip_version(maj_v, min_v, old_c, v_str, v_date):
+    major_ver = maj_v
+    iminor_ver = min_v
+    old_count = old_c
+    ver_str = v_str
+    ver_date = v_date
+  
 
 #####################
 #### Global vars ####
 
-# Settings Dictionary. A set of vars kept in memory and persisted in a file.
-# Edit this default dictionary definition to add or remove "key": "value" pairs or change defaults.
-# note old passwords stored in the "pwd" option will be lost - reverts to default password.
+# Settings Dictionary.  A set of vars kept in memory and persisted in a file.
+# Edit this default dictionary definition to add or remove "key": "value" pairs
+# or change defaults.
+# note old passwords stored in the "pwd" option will be lost - reverts to
+# default password.
+import i18n
 from calendar import timegm
 import json
 import time
+from threading import RLock
 
-platform = ''  # must be done before the following import because gpio_pins will try to set it
-
-# from helpers import password_salt, password_hash, load_programs, station_names
-
-sd = {
+#load the persistent gv.sd data from disk
+sd = { #create defaults for initial dictionary
     u"en": 1,
     u"seq": 1,
     u"ir": [0],
@@ -83,35 +77,87 @@ sd = {
     u"idd": 0,
     u"pigpio": 0,
     u"alr":0,
-    u"srt": u"default"
+    u"vct": u"default"
 }
 
-try:
-    with open('./data/sd.json', 'r') as sdf:  # A config file
-        sd_temp = json.load(sdf)
-    for key in sd:  # If file loaded, replce default values in sd with values from file
-        if key in sd_temp:
-            sd[key] = sd_temp[key]
-except IOError:  # If file does not exist, it will be created using defaults.
-    with open('./data/sd.json', 'w') as sdf:  # save file
-        json.dump(sd, sdf, indent=4, sort_keys=True)
+try: #load sd with content from persistent storage
+    with open('./data/sd.json', 'r') as sdf:
+        try:
+            sd_temp = json.load(sdf)
+        except ValueError as e:
+            print 'Error: JSON fails to parse "./data/sd.json resetting to defaults"'
+            print e
+            try:
+                with open('./data/sd.json', 'w') as sdf:  # save sd to file
+                    json.dump(sd, sdf, indent=4, sort_keys=True)
+            except IOError:
+                #should this be fatal -- persistent config fails.  All config
+                #defaults
+                print 'Error: unable to read or write config file "./data/sd.json"'
 
-if sd["pigpio"]:
+        else: #use data read from persistent storage to override defaults
+            for key in sd:
+                if key in sd_temp:  # replace default values in sd with values from file
+                    sd[key] = sd_temp[key]
+
+except IOError:  # file does not exist
+    try: # create file using defaults
+        with open('./data/sd.json', 'w') as sdf:  # save file
+            json.dump(sd, sdf, indent=4, sort_keys=True)
+    except IOError:
+        #should this be fatal -- persistent config fails.  All config defaults
+        print 'Error: unable to write config to "./data/sd.json"'
+
+# setup gv properties not stored on disk
+vc = None    
+platform = ''  # must be done before the following import because gpio_pins will try to set
+               # it
+               # need to check if this is still true. Verify gpio_pins doesn't depend on
+               # platform being defined
+from valve_controller import vc_types
+
+#jfm let valve_controller assign meaning to 'default'
+vc_types[u'default'] = u'bbsr'
+if sd['vct'] == u'default':
+    sd['vct'] = vc_types[u'default']
+
+
+def load_programs():
+    """
+    Load program data into memory from /data/programs.json file if it exists.
+    otherwise create an empty programs data list (gv.pd).
+    
+    """
+    global pd
     try:
-        subprocess.check_output("pigpiod", stderr=subprocess.STDOUT)
-        use_pigpio = True
-    except Exception:
-        print "pigpio not found. Using RPi.GPIO"
-else:
-    use_pigpio = False       
+        with open('./data/programs.json', 'r') as pf:
+            pd = json.load(pf)
+    except IOError:
+        pd = []  # A config file -- return default and create file if not found.
+        with open('./data/programs.json', 'w') as pf:
+            json.dump(pd, pf, indent=4, sort_keys=True)
+    return pd
 
-from helpers import load_programs, station_names
+def station_names():
+    """
+    Load station names from /data/stations.json file if it exists
+    otherwise create file with defaults.
+    
+    Return station names as a list.
+    
+    """
+    try:
+        with open('./data/snames.json', 'r') as snf:
+            return json.load(snf)
+    except IOError:
+        stations = [u"S01", u"S02", u"S03", u"S04", u"S05", u"S06", u"S07", u"S08"]
+        jsave(stations, 'snames')
+        return stations
 
 nowt = time.localtime()
 now = timegm(nowt)
 tz_offset = int(time.time() - timegm(time.localtime())) # compatible with Javascript (negative tz shown as positive value)
-plugin_menu = []  # Empty list of lists for plugin links (e.g. ['name', 'URL'])
-
+plugin_menu = []  # Empty list of lists for plugin links (e.g.  ['name', 'URL'])
 srvals = [0] * (sd['nst'])  # Shift Register values
 output_srvals = [0] * (sd['nst'])  # Shift Register values last set by set_output()
 output_srvals_lock = RLock()  # Safe threading access when setting state of relays
@@ -152,6 +198,7 @@ options = [
     [_("Extension boards"), "int", "nbrd", _("Number of extension boards."), _("Station Handling")],
     [_("Station delay"), "int", "sdt", _("Station delay time (in seconds), between 0 and 240."), _("Station Handling")],
     [_("Active-Low Relay"), "boolean", "alr", _("Using active-low relay boards connected through shift registers"), _("Station Handling")],
+    [_("Valve Controller"), "vc_enum", "vct", _("Specifies hardware interface for relay boards"), _("Station Handling")],
     [_("Master station"), "int", "mas",_( "Select master station."), _("Configure Master")],
     [_("Master on adjust"), "int", "mton", _("Master on delay (in seconds), between +0 and +60."), _("Configure Master")],
     [_("Master off adjust"), "int", "mtoff", _("Master off delay (in seconds), between -60 and +60."), _("Configure Master")],

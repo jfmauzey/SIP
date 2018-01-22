@@ -13,6 +13,7 @@ import sys
 sys.path.append('./plugins')
 
 import web  # the Web.py module. See webpy.org (Enables the Python SIP web interface)
+web.config.debug = False  # Improves page load speed / remote debugging? jfm
 
 import gv
 from helpers import (
@@ -23,9 +24,7 @@ from helpers import (
                      log_run, 
                      stop_onrain, 
                      check_rain, 
-                     jsave, 
-                     station_names, 
-                     get_rpi_revision
+                     jsave
                      )
 from urls import urls  # Provides access to URLs for UI pages
 from gpio_pins import set_output
@@ -190,6 +189,7 @@ def timing_loop():
         #### End of timing loop ####
 
 
+### setup the web app
 class SIPApp(web.application):
     """Allow program to select HTTP port."""
 
@@ -199,31 +199,52 @@ class SIPApp(web.application):
         return web.httpserver.runsimple(func, ('0.0.0.0', port))
 
 
-app = SIPApp(urls, globals())
-#  disableShiftRegisterOutput()
-web.config.debug = False  # Improves page load speed
-if web.config.get('_session') is None:
-    web.config._session = web.session.Session(app, web.session.DiskStore('sessions'),
-                                              initializer={'user': 'anonymous'})
-template_globals = {
-    'gv': gv,
-    'str': str,
-    'eval': eval,
-    'session': web.config._session,
-    'json': json,
-    'ast': ast,
-    '_': _,
-    'i18n': i18n,
-    'app_path': lambda p: web.ctx.homepath + p,
-    'web': web,
-}
+### move to sip_start in line after import plugins
+#   import plugins needs to occur before creating the app instance
+#
+#global app, template_render
+app = None
+template_render = {}
+def SIPApp_create():
+    '''Create server and initialize context and templates'''
 
-template_render = web.template.render('templates', globals=template_globals, base='base')
+    global app
+    app = SIPApp(urls, globals())
+
+    #  disableShiftRegisterOutput()
+
+    #jfm move web.config.debug to follow import web
+    #web.config.debug = False  # Improves page load speed
+    if web.config.get('_session') is None:
+        web.config._session = web.session.Session(app, web.session.DiskStore('sessions'),
+                                                  initializer={'user': 'anonymous'})
+    global template_globals
+    template_globals = {
+        'gv': gv,
+        'str': str,
+        'eval': eval,
+        'session': web.config._session,
+        'json': json,
+        'ast': ast,
+        '_': _,
+        'i18n': i18n,
+        'app_path': lambda p: web.ctx.homepath + p,
+        'web': web,
+    }
+
+    template_render = web.template.render('templates', globals=template_globals, base='base')
+
+def app_start():
+    SIPApp_create()
+    app.notfound = lambda: web.seeother('/')
+    app.run()
 
 if __name__ == '__main__':
 
     #########################################################
     #### Code to import all webpages and plugin webpages ####
+
+#    SIPApp_create()
 
     import plugins
 
@@ -247,7 +268,7 @@ if __name__ == '__main__':
     if gv.use_gpio_pins:
         set_output()    
 
-
-    app.notfound = lambda: web.seeother('/')
-
-    app.run()
+    app_start()
+    #SIPApp_create()
+    #app.notfound = lambda: web.seeother('/')
+    #app.run()

@@ -24,15 +24,6 @@ import gv
 from web.session import sha1
 
 try:
-    from gpio_pins import GPIO, pin_rain_sense, pin_relay
-    if gv.use_pigpio:
-        import pigpio
-        pi = pigpio.pi()
-except ImportError:
-    print 'error importing GPIO pins into helpers'
-    pass
-
-try:
     import json
 except ImportError:
     try:
@@ -90,10 +81,6 @@ def reboot(wait=1, block=False):
         from gpio_pins import set_output
         gv.srvals = [0] * (gv.sd['nst'])
         set_output()
-        if gv.use_pigpio:
-            pass
-        else:
-            GPIO.cleanup()
         time.sleep(wait)
         try:
             print _('Rebooting...')
@@ -119,10 +106,6 @@ def poweroff(wait=1, block=False):
         from gpio_pins import set_output
         gv.srvals = [0] * (gv.sd['nst'])
         set_output()
-        if gv.use_pigpio:
-            pass
-        else:
-            GPIO.cleanup()
         time.sleep(wait)
         try:
             print _('Powering off...')
@@ -149,10 +132,6 @@ def restart(wait=1, block=False):
         from gpio_pins import set_output
         gv.srvals = [0] * (gv.sd['nst'])
         set_output()
-        if gv.use_pigpio:
-            pass
-        else:
-            GPIO.cleanup()
         time.sleep(wait)
         try:
             print _('Restarting...')
@@ -196,18 +175,6 @@ def get_ip():
         return "No IP Settings"
 
 
-def get_rpi_revision():
-    """
-    Returns the hardware revision of the Raspberry Pi
-    using the RPI_REVISION method from RPi.GPIO.
-    """
-    try:
-        import RPi.GPIO as GPIO
-
-        return GPIO.RPI_REVISION
-    except ImportError:
-        return 0
-
 def mkdir_p(path):
     try:
         os.makedirs(path)
@@ -216,6 +183,9 @@ def mkdir_p(path):
             pass
         else:
             raise
+
+from gpio_pins import config_pin_rain_sense, gp_read
+pin_rain_sense = config_pin_rain_sense()
 
 def check_rain():
     """
@@ -230,22 +200,22 @@ def check_rain():
     try:
         if gv.sd['rst'] == 1:  # Rain sensor type normally open (default)
             if gv.use_pigpio:
-                if not pi.read(pin_rain_sense):  # Rain detected
+                if not gp_read(pin_rain_sense):  # Rain detected
                     gv.sd['rs'] = 1
                 else:
                     gv.sd['rs'] = 0
             else:
-                if GPIO.input(pin_rain_sense) == gv.sd['rs']: #  Rain sensor changed, reading and gv.sd['rs'] are inverse.
+                if gp_read(pin_rain_sense) == gv.sd['rs']: #  Rain sensor changed, reading and gv.sd['rs'] are inverse.
                     report_rain_changed()
                     gv.sd['rs'] = 1 - gv.sd['rs'] #  toggle
         elif gv.sd['rst'] == 0:  # Rain sensor type normally closed
             if gv.use_pigpio:
-                if pi.read(pin_rain_sense):  # Rain detected
+                if gp_read(pin_rain_sense):  # Rain detected
                     gv.sd['rs'] = 1
                 else:
                     gv.sd['rs'] = 0
             else:
-                if GPIO.input(pin_rain_sense) != gv.sd['rs']:  # Rain sensor changed
+                if gp_read(pin_rain_sense) != gv.sd['rs']:  # Rain sensor changed
                     report_rain_changed()
                     gv.sd['rs'] = 1 - gv.sd['rs'] #  toggle
     except NameError:
@@ -493,7 +463,7 @@ def read_log():
             records = logf.readlines()
             for i in records:
                 try:
-                    rec = ast.literal_eval(json.loads(i))
+                    rec = ast.literal_eval(i)
                 except ValueError:
                     rec = json.loads(i)
                 result.append(rec)
@@ -512,37 +482,37 @@ def jsave(data, fname):
         json.dump(data, f, indent=4, sort_keys=True)
 
 
-def station_names():
-    """
-    Load station names from /data/stations.json file if it exists
-    otherwise create file with defaults.
-    
-    Return station names as a list.
-    
-    """
-    try:
-        with open('./data/snames.json', 'r') as snf:
-            return json.load(snf)
-    except IOError:
-        stations = [u"S01", u"S02", u"S03", u"S04", u"S05", u"S06", u"S07", u"S08"]
-        jsave(stations, 'snames')
-        return stations
+#def station_names():
+#    """
+#    Load station names from /data/stations.json file if it exists
+#    otherwise create file with defaults.
+#    
+#    Return station names as a list.
+#    
+#    """
+#    try:
+#        with open('./data/snames.json', 'r') as snf:
+#            return json.load(snf)
+#    except IOError:
+#        stations = [u"S01", u"S02", u"S03", u"S04", u"S05", u"S06", u"S07", u"S08"]
+#        jsave(stations, 'snames')
+#        return stations
 
 
-def load_programs():
-    """
-    Load program data into memory from /data/programs.json file if it exists.
-    otherwise create an empty programs data list (gv.pd).
-    
-    """
-    try:
-        with open('./data/programs.json', 'r') as pf:
-            gv.pd = json.load(pf)
-    except IOError:
-        gv.pd = []  # A config file -- return default and create file if not found.
-        with open('./data/programs.json', 'w') as pf:
-            json.dump(gv.pd, pf, indent=4, sort_keys=True)
-    return gv.pd
+#def load_programs():
+#    """
+#    Load program data into memory from /data/programs.json file if it exists.
+#    otherwise create an empty programs data list (gv.pd).
+#    
+#    """
+#    try:
+#        with open('./data/programs.json', 'r') as pf:
+#            gv.pd = json.load(pf)
+#    except IOError:
+#        gv.pd = []  # A config file -- return default and create file if not found.
+#        with open('./data/programs.json', 'w') as pf:
+#            json.dump(gv.pd, pf, indent=4, sort_keys=True)
+#    return gv.pd
 
 
 def password_salt():

@@ -11,6 +11,8 @@ import ast
 import gv
 from helpers import *
 from gpio_pins import set_output
+from valve_controller import vc_types
+from valve_controller.valve_controller_factory import ValveControllerFactory
 from sip import template_render
 from blinker import signal
 
@@ -176,8 +178,52 @@ class change_options(ProtectedPage):
         if 'onbrd' in qdict:
             if int(qdict['onbrd']) + 1 != gv.sd['nbrd']:
                 self.update_scount(qdict)
-            gv.sd['nbrd'] = int(qdict['onbrd']) + 1
-            gv.sd['nst'] = gv.sd['nbrd'] * 8
+                gv.sd['nbrd'] = int(qdict['onbrd']) + 1
+                gv.sd['nst'] = gv.sd['nbrd'] * 8
+                gv.vc.setNumberStations(gv.sd['nst'])
+
+        if 'oalr' in qdict: #only checked box reported
+            if (qdict['oalr'] == 1 or qdict['oalr'] == 'on') and gv.sd['alr'] != 1:
+                gv.sd['alr'] = 1
+                gv.vc.setActiveLow()
+            elif (qdict['oalr'] == 0 or qdict['oalr'] == 'off') and gv.sd['alr'] != 0:
+                print "this code should never execute because only checked boxes are reported"
+                gv.sd['alr'] = 0
+                gv.vc.setActiveHigh()
+        elif gv.sd['alr'] == 1: #only checked box reported
+            gv.sd['alr'] = 0
+            gv.vc.setActiveHigh()
+
+        if 'ovct' in qdict: #no error checking yet
+            if gv.sd['vct'] in vc_types:
+                if qdict['ovct'] in vc_types:
+                    if qdict['ovct'] != gv.sd['vct']: #vc may have changed
+                        gv.vc.cleanup_hw() #release any hardware resources held by current vc
+                        del (gv.vc)
+                        gv.vc = None
+                        if qdict['ovct'] == 'default':
+                            if gv.sd['vct'] != vc_types['default']:
+                                gv.sd['vct'] = vc_types['default']
+                                gv.vc = ValveControllerFactory(gv.sd['vct'], gv.sd['nst'], gv.sd['alr'])
+                        else:
+                            gv.sd['vct'] = qdict['ovct']
+                            gv.vc = ValveControllerFactory(gv.sd['vct'], gv.sd['nst'], gv.sd['alr'])
+                else:
+                    #Selected type returned by client not valid for installed Valve Controllers
+                    print "Error: selected Valve Controller ({}) not listed in installed Valve Controller Types\n".format(gv.sd['vct'])
+                    # ??Should this be fatal error??
+                    gv.sd['vct'] = 'virtual'
+                    gv.vc = ValveControllerFactory('virtual', gv.sd['nst'], gv.sd['alr'])
+
+            else: #Currently specified vc not installed in vc_types (e.g. outdated config file)
+                if gv.sd['vct'] == vc_types['default']:
+                    gv.sd['vct'] = 'virtual'
+                    gv.vc = ValveControllerFactory('virtual', gv.sd['nst'], gv.sd['alr'])
+                    print "Error: Default Valve Controller missing {} Valve Controller Interface".format(gv.sd['vct'])
+                    # ??should this be fatal??
+                else:
+                    gv.sd['vct'] = vc_types['default']
+                    gv.vc = ValveControllerFactory(vc_types['default'], gv.sd['nst'], gv.sd['alr'])
 
         if 'ohtp' in qdict:
             if 'htp' not in gv.sd or gv.sd['htp'] != int(qdict['ohtp']):
@@ -190,7 +236,7 @@ class change_options(ProtectedPage):
                     raise web.seeother('/vo?errorCode=mton_minus')                 
                 gv.sd[f] = int(qdict['o'+f])
 
-        for f in ['ipas', 'tf', 'urs', 'seq', 'rst', 'lg', 'idd', 'pigpio', 'alr']:
+        for f in ['ipas', 'tf', 'urs', 'seq', 'rst', 'lg', 'idd', 'pigpio']:
             if 'o'+f in qdict and (qdict['o'+f] == 'on' or qdict['o'+f] == '1'):
                 gv.sd[f] = 1
             else:

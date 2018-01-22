@@ -60,8 +60,6 @@ try:
                 relay_pins[i] = gv.pin_map[relay_pins[i]]
             except:
                 relay_pins[i] = 0
-        pin_rain_sense = gv.pin_map[8]
-        pin_relay = gv.pin_map[10]
     else:
         print 'relay board plugin only supported on pi.'
 except:
