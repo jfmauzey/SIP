@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2020
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "SIP1", "SIP1.pyproj", "{8E54959C-E19B-4364-BC9A-C9F34BA3872C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|rpi = Debug|rpi
+		Release|Any CPU = Release|Any CPU
+		Release|rpi = Release|rpi
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8E54959C-E19B-4364-BC9A-C9F34BA3872C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E54959C-E19B-4364-BC9A-C9F34BA3872C}.Debug|rpi.ActiveCfg = Debug|Any CPU
+		{8E54959C-E19B-4364-BC9A-C9F34BA3872C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E54959C-E19B-4364-BC9A-C9F34BA3872C}.Release|rpi.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {60746E14-B410-4953-BBE6-D1808233B62D}
+	EndGlobalSection
+EndGlobal
