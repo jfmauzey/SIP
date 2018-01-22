@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{8e54959c-e19b-4364-bc9a-c9f34ba3872c}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>sip_start.py</StartupFile>
+    <StartupFile>sip.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
