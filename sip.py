@@ -13,7 +13,6 @@ import sys
 sys.path.append('./plugins')
 
 import web  # the Web.py module. See webpy.org (Enables the Python SIP web interface)
-web.config.debug = False  # Improves page load speed / remote debugging? jfm
 
 import gv
 from helpers import (
@@ -204,17 +203,16 @@ class SIPApp(web.application):
 #
 #global app, template_render
 app = None
-template_render = {}
+template_render = None
 def SIPApp_create():
     '''Create server and initialize context and templates'''
 
     global app
     app = SIPApp(urls, globals())
 
-    #  disableShiftRegisterOutput()
+    #  disableShiftRegisterOutput() #jfm should be handled by create vc
 
-    #jfm move web.config.debug to follow import web
-    #web.config.debug = False  # Improves page load speed
+    web.config.debug = False  # Improves page load speed
     if web.config.get('_session') is None:
         web.config._session = web.session.Session(app, web.session.DiskStore('sessions'),
                                                   initializer={'user': 'anonymous'})
@@ -232,10 +230,10 @@ def SIPApp_create():
         'web': web,
     }
 
+    global template_render
     template_render = web.template.render('templates', globals=template_globals, base='base')
 
 def app_start():
-    SIPApp_create()
     app.notfound = lambda: web.seeother('/')
     app.run()
 
@@ -244,7 +242,7 @@ if __name__ == '__main__':
     #########################################################
     #### Code to import all webpages and plugin webpages ####
 
-#    SIPApp_create()
+    SIPApp_create()
 
     import plugins
 
@@ -263,12 +261,15 @@ if __name__ == '__main__':
     except Exception:
         pass
     
+    from valve_controller.valve_controller_factory import ValveControllerFactory as vcf
+    if gv.vc == None: #may be created by plugins to override default
+        gv.vc = vcf(gv.sd['vct'], gv.sd['nst'], gv.sd['alr'])
+
+
+    #jfm initialization should have occured when the valve controller was created
+    #    if gv.use_gpio_pins:
+    #        set_output()    
+
     thread.start_new_thread(timing_loop, ())
 
-    if gv.use_gpio_pins:
-        set_output()    
-
     app_start()
-    #SIPApp_create()
-    #app.notfound = lambda: web.seeother('/')
-    #app.run()

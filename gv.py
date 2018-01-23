@@ -4,19 +4,25 @@
 
 ##############################
 #### Revision information ####
-major_ver = None
-minor_ver = None
-old_count = None
-ver_str = None
-ver_date = None
+major_ver = 3
+minor_ver = 2
+old_count = 747
+ver_date = '2015-01-09'
 
-def set_sip_version(maj_v, min_v, old_c, v_str, v_date):
-    major_ver = maj_v
-    iminor_ver = min_v
-    old_count = old_c
-    ver_str = v_str
-    ver_date = v_date
-  
+try:
+    revision = int(subprocess.check_output(['git', 'rev-list', '--count', 'HEAD']))
+    ver_str = '%d.%d.%d' % (major_ver, minor_ver, (revision - old_count))
+except Exception:
+    print _('Could not use git to determine version!')
+    revision = 999
+    ver_str = '%d.%d.%d' % (major_ver, minor_ver, revision)
+
+try:
+    ver_date = subprocess.check_output(['git', 'log', '-1', '--format=%cd', '--date=short']).strip()
+except Exception:
+    print _('Could not use git to determine date of last commit!')
+    ver_date = '2015-01-09'
+
 
 #####################
 #### Global vars ####

@@ -7,9 +7,9 @@ class SliceOfPi_IOExpander(vcf.VirtualValveController):
 
     def __init__(self,nst=8, alr = False, quiet = False):
         super(SliceOfPi_IOExpander, self).__init__(nst, alr, quiet)
+        self.pins = {} #mapping for hardare resources e.g. pins, busses, ...
         #TO DO: need to initialize outputs
         #self.setOutputs([0] * self.nst)
-        self.pins = {} #mapping for hardare resources e.g. pins, busses, ...
 
     def cleanup_hw(self):
         pins = [pin for pin in self.pins.itervalues()]

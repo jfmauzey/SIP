@@ -10,7 +10,12 @@ class SimulatedValveController(vcf.VirtualValveController):
         super(SimulatedValveController, self).__init__(nst, alr, quiet)
         #TO DO: need to initialize outputs
         #self.setOutputs([0] * self.nst)
-        self.pins = {} #mapping for hardare resources e.g. pins, busses, ...
+        self.pins = { #simulated mapping for hardare resources e.g. pins, busses, ...
+            'pin_sr_dat' : 3,
+            'pin_sr_clk' : 4,
+            'pin_sr_noe' : 5,
+            'pin_sr_lat' : 6
+            }
 
     def cleanup_hw(self):
         pins = [pin for pin in self.pins.itervalues()]

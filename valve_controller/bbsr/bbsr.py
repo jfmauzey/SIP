@@ -11,7 +11,6 @@ class BitBangShiftReg(vcf.VirtualValveController):
         super(BitBangShiftReg, self).__init__(nst, alr, quiet)
         self._setup_pins()
         self.setOutput([0] * self.nst)
-        self.pins = {} #mapping for hardare resources e.g. pins, busses, ...
 
     def _write0(self,pin):
         gp_write(pin,0)

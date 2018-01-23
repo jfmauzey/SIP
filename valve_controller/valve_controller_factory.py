@@ -11,7 +11,7 @@ class VirtualValveController(object):
     """
 
     def __init__(self, nst=8, alr=False, quiet=False):
-        self.pins = {} #simulated mapping for hardare resources e.g. pins, busses, ...
+        self.pins = {} #contains mapping for hardare resources e.g. pins, busses, ...
         if quiet:
           self._dbg = lambda *args, **kw: None
         else:

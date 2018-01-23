@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\web",
+    "\\web\\wsgiserver"
   ],
-  "SelectedNode": "\\sip.py",
+  "SelectedNode": "\\web\\template.py",
   "PreviewInSolutionExplorer": false
 }
