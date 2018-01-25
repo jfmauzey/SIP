@@ -333,8 +333,8 @@ class get_set_station(ProtectedPage):
                 gv.sd['bsy'] = 1
                 time.sleep(1)
             else:  # If status is off
-                gv.rs[sid][1] = gv.now
-                time.sleep(1)
+                gv.rs[sid][1] = gv.now + 2
+                time.sleep(2)
             raise web.seeother('/')
         else:
             return _('Manual mode not active.')
