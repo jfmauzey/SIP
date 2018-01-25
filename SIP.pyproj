@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{03e7c395-6142-47a5-bc64-d81507e4bc72}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>sip.py</StartupFile>
+    <SearchPath />
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId />
+    <IsWindowsApplication>False</IsWindowsApplication>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="gv_reference.txt" />
+    <Content Include="plugins\relay_board.html" />
+    <Content Include="static\bootstrap-3.3.7\css\bootstrap-theme.css" />
+    <Content Include="static\bootstrap-3.3.7\css\bootstrap-theme.min.css" />
+    <Content Include="static\bootstrap-3.3.7\css\bootstrap.css" />
+    <Content Include="static\bootstrap-3.3.7\css\bootstrap.min.css" />
+    <Content Include="static\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="static\bootstrap-3.3.7\js\bootstrap.js" />
+    <Content Include="static\bootstrap-3.3.7\js\bootstrap.min.js" />
+    <Content Include="static\bootstrap-3.3.7\js\npm.js" />
+    <Content Include="static\bootstrap-timepicker\css\bootstrap-timepicker.css" />
+    <Content Include="static\bootstrap-timepicker\css\bootstrap-timepicker.min.css" />
+    <Content Include="static\bootstrap-timepicker\js\bootstrap-timepicker.js" />
+    <Content Include="static\bootstrap-timepicker\js\bootstrap-timepicker.min.js" />
+    <Content Include="static\docs\plugins\proto-docs.html" />
+    <Content Include="static\docs\plugins\system_update-docs.html" />
+    <Content Include="static\images\android-icon-144x144.png" />
+    <Content Include="static\images\android-icon-192x192.png" />
+    <Content Include="static\images\android-icon-36x36.png" />
+    <Content Include="static\images\android-icon-48x48.png" />
+    <Content Include="static\images\android-icon-72x72.png" />
+    <Content Include="static\images\android-icon-96x96.png" />
+    <Content Include="static\images\apple-icon-114x114.png" />
+    <Content Include="static\images\apple-icon-120x120.png" />
+    <Content Include="static\images\apple-icon-144x144.png" />
+    <Content Include="static\images\apple-icon-152x152.png" />
+    <Content Include="static\images\apple-icon-180x180.png" />
+    <Content Include="static\images\apple-icon-57x57.png" />
+    <Content Include="static\images\apple-icon-60x60.png" />
+    <Content Include="static\images\apple-icon-72x72.png" />
+    <Content Include="static\images\apple-icon-76x76.png" />
+    <Content Include="static\images\apple-icon-precomposed.png" />
+    <Content Include="static\images\apple-icon.png" />
+    <Content Include="static\images\favicon-16x16.png" />
+    <Content Include="static\images\favicon-32x32.png" />
+    <Content Include="static\images\favicon-96x96.png" />
+    <Content Include="static\images\favicon.ico" />
+    <Content Include="static\images\favicon.png" />
+    <Content Include="static\images\logo.png" />
+    <Content Include="static\images\ms-icon-144x144.png" />
+    <Content Include="static\images\ms-icon-150x150.png" />
+    <Content Include="static\images\ms-icon-310x310.png" />
+    <Content Include="static\images\ms-icon-70x70.png" />
+    <Content Include="static\scripts\behaviors.js" />
+    <Content Include="static\scripts\intervalSelect.js" />
+    <Content Include="static\scripts\jquery-3.1.0.min.js" />
+    <Content Include="static\scripts\schedule.js" />
+    <Content Include="static\themes\basic\base.css" />
+    <Content Include="static\themes\basic\BlueTile.png" />
+    <Content Include="static\themes\basic\checkmark.png" />
+    <Content Include="static\themes\basic\collapsed.png" />
+    <Content Include="static\themes\basic\expanded.png" />
+    <Content Include="static\themes\basic\grass.jpg" />
+    <Content Include="static\themes\basic\grass.png" />
+    <Content Include="static\themes\basic\home.png" />
+    <Content Include="static\themes\basic\logo.png" />
+    <Content Include="static\themes\basic\off.png" />
+    <Content Include="static\themes\basic\on.png" />
+    <Content Include="static\themes\basic\whitestripes.png" />
+    <Content Include="templates\base.html" />
+    <Content Include="templates\home.html" />
+    <Content Include="templates\log.html" />
+    <Content Include="templates\login.html" />
+    <Content Include="templates\modify.html" />
+    <Content Include="templates\monthly.html" />
+    <Content Include="templates\options.html" />
+    <Content Include="templates\plugins.html" />
+    <Content Include="templates\plugins_repo.html" />
+    <Content Include="templates\programs.html" />
+    <Content Include="templates\proto.html" />
+    <Content Include="templates\restarting.html" />
+    <Content Include="templates\runonce.html" />
+    <Content Include="templates\stations.html" />
+    <Content Include="templates\system_update.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="blinker\base.py" />
+    <Compile Include="blinker\_saferef.py" />
+    <Compile Include="blinker\_utilities.py" />
+    <Compile Include="blinker\__init__.py" />
+    <Compile Include="gpio_pins.py" />
+    <Compile Include="gv.py" />
+    <Compile Include="helpers.py" />
+    <Compile Include="i18n.py" />
+    <Compile Include="ospi.py" />
+    <Compile Include="plugins\mobile_app.py" />
+    <Compile Include="plugins\plugin_manager.py" />
+    <Compile Include="plugins\proto.py" />
+    <Compile Include="plugins\signaling_examples.py" />
+    <Compile Include="plugins\system_update.py" />
+    <Compile Include="plugins\__init__.py" />
+    <Compile Include="ReverseProxied.py" />
+    <Compile Include="sip.py" />
+    <Compile Include="urls.py" />
+    <Compile Include="webpages.py" />
+    <Compile Include="web\application.py" />
+    <Compile Include="web\browser.py" />
+    <Compile Include="web\contrib\template.py" />
+    <Compile Include="web\contrib\__init__.py" />
+    <Compile Include="web\db.py" />
+    <Compile Include="web\debugerror.py" />
+    <Compile Include="web\form.py" />
+    <Compile Include="web\http.py" />
+    <Compile Include="web\httpserver.py" />
+    <Compile Include="web\net.py" />
+    <Compile Include="web\python23.py" />
+    <Compile Include="web\session.py" />
+    <Compile Include="web\template.py" />
+    <Compile Include="web\test.py" />
+    <Compile Include="web\utils.py" />
+    <Compile Include="web\webapi.py" />
+    <Compile Include="web\webopenid.py" />
+    <Compile Include="web\wsgi.py" />
+    <Compile Include="web\wsgiserver\ssl_builtin.py" />
+    <Compile Include="web\wsgiserver\ssl_pyopenssl.py" />
+    <Compile Include="web\wsgiserver\__init__.py" />
+    <Compile Include="web\__init__.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="blinker" />
+    <Folder Include="plugins" />
+    <Folder Include="static\" />
+    <Folder Include="static\bootstrap-3.3.7\" />
+    <Folder Include="static\bootstrap-3.3.7\css" />
+    <Folder Include="static\bootstrap-3.3.7\fonts" />
+    <Folder Include="static\bootstrap-3.3.7\js" />
+    <Folder Include="static\bootstrap-timepicker\" />
+    <Folder Include="static\bootstrap-timepicker\css" />
+    <Folder Include="static\bootstrap-timepicker\js" />
+    <Folder Include="static\docs\" />
+    <Folder Include="static\docs\plugins" />
+    <Folder Include="static\images" />
+    <Folder Include="static\scripts" />
+    <Folder Include="static\themes\" />
+    <Folder Include="static\themes\basic" />
+    <Folder Include="templates" />
+    <Folder Include="web" />
+    <Folder Include="web\contrib" />
+    <Folder Include="web\wsgiserver" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+</Project>
