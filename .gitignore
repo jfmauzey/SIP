@@ -14,4 +14,7 @@ web/
 !/plugins/system_update.py
 !/plugins/plugin_manager.py
 /plugins/manifests/*
-!/plugins/manifests/proto.manifest
+!/plugins/manifests/proto.manif
+# Python Tools for Visual Studio (PTVS)
+.vs/
+*.user
