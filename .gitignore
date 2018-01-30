@@ -16,18 +16,5 @@ web/
 /plugins/manifests/*
 !/plugins/manifests/proto.manif
 # Python Tools for Visual Studio (PTVS)
-# User-specific files
-*.suo
+.vs/
 *.user
-*.userosscache
-*.sln.docstates
-*.userprefs
-# Visual Studio cache files
-# files ending in .cache can be ignored
-*.[Cc]ache
-# but keep track of directories ending in .cache
-!*.[Cc]ache/
-# Visual Studio 2017 auto generated files
-Generated\ Files/
-# Visual Studio 2015/2017 cache/options directory
-.vs/est
