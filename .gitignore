@@ -18,3 +18,4 @@ web/
 # Python Tools for Visual Studio (PTVS)
 .vs/
 *.user
+*.sln
