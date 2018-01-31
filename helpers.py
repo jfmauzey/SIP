@@ -24,10 +24,7 @@ import gv
 from web.session import sha1
 
 try:
-    from gpio_pins import GPIO, pin_rain_sense, pin_relay
-    if gv.use_pigpio:
-        import pigpio
-        pi = pigpio.pi()
+    from gpio_pins import  pin_rain_sense, pin_relay, gp_read
 except ImportError:
     print 'error importing GPIO pins into helpers'
     pass
@@ -87,13 +84,10 @@ def reboot(wait=1, block=False):
         Set to True at start of thread (recursive).
     """
     if block:
-        from gpio_pins import set_output
+        from gpio_pins import set_output, gp_cleanup
         gv.srvals = [0] * (gv.sd['nst'])
         set_output()
-        if gv.use_pigpio:
-            pass
-        else:
-            GPIO.cleanup()
+        gp_cleanup()
         time.sleep(wait)
         try:
             print _('Rebooting...')
@@ -116,13 +110,10 @@ def poweroff(wait=1, block=False):
         Set to True at start of thread (recursive).
     """
     if block:
-        from gpio_pins import set_output
+        from gpio_pins import set_output, gp_cleanup
         gv.srvals = [0] * (gv.sd['nst'])
         set_output()
-        if gv.use_pigpio:
-            pass
-        else:
-            GPIO.cleanup()
+        gp_cleanup()
         time.sleep(wait)
         try:
             print _('Powering off...')
@@ -146,13 +137,10 @@ def restart(wait=1, block=False):
     """
     if block:
         report_restart()
-        from gpio_pins import set_output
+        from gpio_pins import set_output, gp_cleanup
         gv.srvals = [0] * (gv.sd['nst'])
         set_output()
-        if gv.use_pigpio:
-            pass
-        else:
-            GPIO.cleanup()
+        gp_cleanup()
         time.sleep(wait)
         try:
             print _('Restarting...')
@@ -226,26 +214,25 @@ def check_rain():
     Sets gv.sd['rs'] to 1 if rain is detected otherwise 0.
     """
 
-    global pi
     try:
         if gv.sd['rst'] == 1:  # Rain sensor type normally open (default)
             if gv.use_pigpio:
-                if not pi.read(pin_rain_sense):  # Rain detected
+                if not gp_read(pin_rain_sense):  # Rain detected
                     gv.sd['rs'] = 1
                 else:
                     gv.sd['rs'] = 0
             else:
-                if GPIO.input(pin_rain_sense) == gv.sd['rs']: #  Rain sensor changed, reading and gv.sd['rs'] are inverse.
+                if gp_read(pin_rain_sense) == gv.sd['rs']: #  Rain sensor changed, reading and gv.sd['rs'] are inverse.
                     report_rain_changed()
                     gv.sd['rs'] = 1 - gv.sd['rs'] #  toggle
         elif gv.sd['rst'] == 0:  # Rain sensor type normally closed
             if gv.use_pigpio:
-                if pi.read(pin_rain_sense):  # Rain detected
+                if gp_read(pin_rain_sense):  # Rain detected
                     gv.sd['rs'] = 1
                 else:
                     gv.sd['rs'] = 0
             else:
-                if GPIO.input(pin_rain_sense) != gv.sd['rs']:  # Rain sensor changed
+                if gp_read(pin_rain_sense) != gv.sd['rs']:  # Rain sensor changed
                     report_rain_changed()
                     gv.sd['rs'] = 1 - gv.sd['rs'] #  toggle
     except NameError:
