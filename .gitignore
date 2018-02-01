@@ -17,5 +17,5 @@ web/
 !/plugins/manifests/proto.manifest
 # Python Tools for Visual Studio (PTVS)
 .vs/
+*.suo
 *.user
-*.sln
