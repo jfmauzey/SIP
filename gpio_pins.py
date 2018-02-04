@@ -16,6 +16,8 @@ differences and allow usage of the gpio hardware independent of the platform.
     gp_write(pin,val)
     gp_read(pin)
     gp_cleanup(header_pins = None)
+
+Pins are identified by the number of the hardware connector pin number.
 """
 
 import os
