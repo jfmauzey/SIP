@@ -1,4 +1,22 @@
 # -*- coding: utf-8 -*-
+"""
+This module provides the interface to the valve controller and to the rain
+sense input.
+
+set_output transfers the state of the global gv.sr_vals to activate sprinkler
+valves.
+
+This module provides a common interface to configure, control, and remove
+access to the hardware pins attached to the platform.
+
+There are five functions defined in this module that abstract the platform
+differences and allow usage of the gpio hardware independent of the platform.
+    gp_config_output(pin):
+    gp_config_input(pin, pullup='off')
+    gp_write(pin,val)
+    gp_read(pin)
+    gp_cleanup(header_pins = None)
+"""
 
 import os
 import subprocess
@@ -77,6 +95,11 @@ claimed_gpio_pins = [False] * len(gv.pin_map)
 shareable_gpio_pins = [False] * len(gv.pin_map) 
 
 def map_gpio_pin(pinNum, shareable = False):
+    """
+    Input: pinNum is integer value of the hardware connector.
+    Returns: reference to a device hardware port or None if not mappable.
+    """
+
     if gv.pin_map[pinNum]: #pin is mappable if not 0 or None
         if claimed_gpio_pins[pinNum]:
             if shareable_gpio_pins[pinNum]:
@@ -102,10 +125,10 @@ if gv.platform == 'pi' and gv.use_pigpio:
         import pigpio
         pi = pigpio.pi()
 
-        def config_gpio_output(pin):
+        def gp_config_output(pin):
             pi.set_mode(pin, pigpio.OUTPUT)
         
-        def config_gpio_input(pin, pullup='off'):
+        def gp_config_input(pin, pullup='off'):
             pi.set_mode(pin, pigpio.INPUT)
             if pullup == 'up':
                 pi.set_pull_up_down(pin, pigpio.PUD_UP)
@@ -121,21 +144,25 @@ if gv.platform == 'pi' and gv.use_pigpio:
             return pi.read(pin)
 
         def gp_cleanup(header_pins = None): #untested
+            """
+            Input: header_pins is list of integers corresponding
+            to the hardware connector numbering.
+            """
             if header_pins == None:  #unmap all claimed pins
                   header_pins = [x for x in range(len(gv.pin_map))]
             for i in header_pins:
                 if claimed_gpio_pins[i]:
-                    config_gpio_input(gv.pin_map[i]) #config pin as a high impedance input
+                    gp_config_input(gv.pin_map[i]) #config pin as a high impedance input
                     unmap_gpio_pin(i)
 
     except ImportError: #assume default RPi libraries are available
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BOARD) #IO channels are identified by header connector pin numbers. Pin numbers are 
 
-        def config_gpio_output(pin):
+        def gp_config_output(pin):
             GPIO.setup(pin, GPIO.OUT)
 
-        def config_gpio_input(pin, pullup='off'):
+        def gp_config_input(pin, pullup='off'):
             if pullup == 'up':
                 GPIO.setup(pin, GPIO.IN, pull_up_down = GPIO.PUD_UP)
             elif pullup == 'down':
@@ -153,11 +180,15 @@ if gv.platform == 'pi' and gv.use_pigpio:
             return GPIO.input(pin)
 
         def gp_cleanup(header_pins = None):
+            """
+            Input: header_pins is list of integers corresponding
+            to the hardware connector numbering.
+            """
             if header_pins == None:  #unmap all claimed pins
                   header_pins = [x for x in range(len(gv.pin_map))]
             for i in header_pins:
                 if claimed_gpio_pins[i]:
-                    config_gpio_input(gv.pin_map[i]) #config pin as a high impedance input
+                    gp_config_input(gv.pin_map[i]) #config pin as a high impedance input
                     unmap_gpio_pin(i)
 
 elif gv.platform == 'pi' or gv.platform == 'bo':
@@ -165,10 +196,10 @@ elif gv.platform == 'pi' or gv.platform == 'bo':
     if gv.platform == 'pi':
         GPIO.setmode(GPIO.BOARD) #IO channels are identified by header connector pin numbers. Pin numbers are 
 
-    def config_gpio_output(pin):
+    def gp_config_output(pin):
         GPIO.setup(pin, GPIO.OUT)
 
-    def config_gpio_input(pin, pullup='off'):
+    def gp_config_input(pin, pullup='off'):
         if pullup == 'up':
             GPIO.setup(pin, GPIO.IN, pull_up_down = GPIO.PUD_UP)
         elif pullup == 'down':
@@ -186,18 +217,22 @@ elif gv.platform == 'pi' or gv.platform == 'bo':
         return GPIO.input(pin)
 
     def gp_cleanup(header_pins = None):
+        """
+        Input: header_pins is list of integers corresponding
+        to the hardware connector numbering.
+        """
         if header_pins == None:  #unmap all claimed pins
               header_pins = [x for x in range(len(gv.pin_map))]
         for i in header_pins:
             if claimed_gpio_pins[i]:
-                config_gpio_input(gv.pin_map[i]) #config pin as a high impedance input
+                gp_config_input(gv.pin_map[i]) #config pin as a high impedance input
                 unmap_gpio_pin(i)
 
 elif gv.platform == 'nt' or gv.platform == '': #use simulated IO
-    def config_gpio_output(pin):
+    def gp_config_output(pin):
         pass
 
-    def config_gpio_input(pin, pullup='off'):
+    def gp_config_input(pin, pullup='off'):
         pass
 
     def gp_write(pin,val):
@@ -207,15 +242,17 @@ elif gv.platform == 'nt' or gv.platform == '': #use simulated IO
         return 1      #dummy return for simulation
 
     def gp_cleanup(header_pins = None):
-        '''The simulated cleanup only needs to unmap the used pins.
+        """
+        The simulated cleanup only needs to unmap the used pins.
         Making the config calls is not needed. However the simulation
-        runs truer to the actual code used to control physical hardware.'''
+        runs truer to the actual code used to control physical hardware.
+        """
 
         if header_pins == None:  #unmap all claimed pins
               header_pins = [x for x in range(len(gv.pin_map))]
         for i in header_pins:
             if claimed_gpio_pins[i]:
-                config_gpio_input(gv.pin_map[i]) #config pin as a high impedance input
+                gp_config_input(gv.pin_map[i]) #config pin as a high impedance input
                 unmap_gpio_pin(i)
 
 else: #Oppps! The dreaded configuration errror
@@ -228,7 +265,7 @@ else: #Oppps! The dreaded configuration errror
 
 ###
 #Kludge: Pin allocation and setup should be moved out of gpio_pins
-#e.g.    pin_rain_sense = gpio_pins.map_gpio_pin(8,shareable=False)
+#        Mapping should be done in the module that uses the pin(s).
 ###
 global pin_rain_sense
 
@@ -239,7 +276,7 @@ def config_pin_rain_sense():
         pin_rain_sense = map_gpio_pin(15,shareable=False)
     else: #for simulation
         pin_rain_sense = map_gpio_pin(5,shareable=False)
-    config_gpio_input(pin_rain_sense, pullup='up')
+    gp_config_input(pin_rain_sense, pullup='up')
     return pin_rain_sense
 
 global pin_relay
@@ -250,7 +287,7 @@ def config_pin_relay():
         pin_relay = map_gpio_pin(16,shareable=False)
     else: #for simulation
         pin_relay = map_gpio_pin(6,shareable=False)
-    config_gpio_output(pin_relay)
+    gp_config_output(pin_relay)
     return pin_relay
 
 from blinker import signal
@@ -286,10 +323,10 @@ def setup_pins():
             pin_sr_noe = map_gpio_pin(3,shareable=False)
             pin_sr_lat = map_gpio_pin(4,shareable=False)
 
-        config_gpio_output(pin_sr_noe)
-        config_gpio_output(pin_sr_clk)
-        config_gpio_output(pin_sr_dat)
-        config_gpio_output(pin_sr_lat)
+        gp_config_output(pin_sr_noe)
+        gp_config_output(pin_sr_clk)
+        gp_config_output(pin_sr_dat)
+        gp_config_output(pin_sr_lat)
         gp_write(pin_sr_noe,1)
         gp_write(pin_sr_clk,0)
         gp_write(pin_sr_dat,0)
@@ -299,7 +336,9 @@ def setup_pins():
         pass
 
 def disableShiftRegisterOutput():
-    """Disable output from shift register."""
+    """
+    Disable output from shift register.
+    """
 
     global pi
     try:
@@ -314,7 +353,9 @@ def disableShiftRegisterOutput():
 
 
 def enableShiftRegisterOutput():
-    """Enable output from shift register."""
+    """
+    Enable output from shift register.
+    """
 
     global pi
     try:
@@ -324,7 +365,9 @@ def enableShiftRegisterOutput():
 
 
 def setShiftRegister(srvals):
-    """Set the state of each output pin on the shift register from the srvals list."""
+    """
+    Set the state of each output pin on the shift register from the srvals list.
+    """
 
     global pi
     try:
@@ -344,8 +387,7 @@ def setShiftRegister(srvals):
 
 def set_output():
     """
-    Activate triacs according to shift register state.
-    If using SIP with shift registers and active low relays, uncomment the line indicated below.
+    Write contents of shift register to the valve controller hardware outputs.
     """
 
     with gv.output_srvals_lock:
