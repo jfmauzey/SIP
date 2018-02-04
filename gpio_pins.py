@@ -281,6 +281,8 @@ def config_pin_rain_sense():
     gp_config_input(pin_rain_sense, pullup='up')
     return pin_rain_sense
 
+pin_rain_sense = config_pin_rain_sense()
+
 global pin_relay
 def config_pin_relay():
     if gv.platform == 'pi':  # If this will run on Raspberry Pi:
@@ -291,6 +293,8 @@ def config_pin_relay():
         pin_relay = map_gpio_pin(6,shareable=False)
     gp_config_output(pin_relay)
     return pin_relay
+
+pin_relay = config_pin_relay()
 
 from blinker import signal
 zone_change = signal('zone_change')
