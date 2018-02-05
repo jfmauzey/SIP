@@ -24,7 +24,7 @@ import gv
 from web.session import sha1
 
 try:
-    from gpio_pins import  pin_rain_sense, pin_relay, gp_read
+    from gpio_pins import pin_relay, gp_read, config_pin_rain_sense
 except ImportError:
     print 'error importing GPIO pins into helpers'
     pass
@@ -205,14 +205,26 @@ def mkdir_p(path):
         else:
             raise
 
+pin_rain_sense  = None
+
 def check_rain():
     """
     Checks status of an installed rain sensor.
-    
+    On first call initializes the hardware pin used by the rain sensor.
     Handles normally open and normally closed rain sensors
     
     Sets gv.sd['rs'] to 1 if rain is detected otherwise 0.
     """
+
+    global pin_rain_sense
+
+    if not gv.use_gpio_pins:
+        return
+
+    try:
+        pin_rain_sense
+    except NameError:
+        pin_rain_sense = config_pin_rain_sense()
 
     try:
         if gv.sd['rst'] == 1:  # Rain sensor type normally open (default)
