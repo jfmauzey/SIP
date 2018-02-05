@@ -25,7 +25,7 @@ import subprocess
 import gv
 
 ###
-#fall through logic to configure platform specific runtime requirements
+# Fall through logic to configure platform specific runtime requirements.
 ###
 
 if gv.sd['pigpio']:
@@ -42,28 +42,28 @@ try:
     import RPi.GPIO as GPIO
     gv.platform = 'pi'
     rev = GPIO.RPI_REVISION
-    #map header connector pins to gpio names/nums
+    # Map header connector pins to gpio names/nums.
     if rev == 1:
-        # map 26 physical pins (1based) with 0 for pins that do not have a gpio number
+        # Map 26 physical pins (1based) with 0 for pins that do not have a gpio number.
         if gv.use_pigpio:
             gv.pin_map = [0,0,0,0,0,1,0,4,14,0,15,17,18,21,0,22,23,0,24,10,0,9,25,11,8,0,7]
         else:
             gv.pin_map = [0,0,0,0,0,5,0,7,8,0,10,11,12,13,0,15,16,0,18,19,0,21,22,23,24,0,26]
     elif rev == 2:
-        # map 26 physical pins (1based) with 0 for pins that do not have a gpio number
+        # Map 26 physical pins (1based) with 0 for pins that do not have a gpio number.
         if gv.use_pigpio:
             gv.pin_map = [0,0,0,2,0,3,0,4,14,0,15,17,18,27,0,22,23,0,24,10,0,9,25,11,8,0,7]
         else:
             gv.pin_map = [0,0,0,0,0,5,0,7,8,0,10,11,12,13,0,15,16,0,18,19,0,21,22,23,24,0,26]
     elif rev == 3:
-        # map 40 physical pins (1based) with 0 for pins that do not have a gpio number
+        # Map 40 physical pins (1based) with 0 for pins that do not have a gpio number.
         if gv.use_pigpio:
             gv.pin_map = [0,0,0,2,0,3,0,4,14,0,15,17,18,27,0,22,23,0,24,10,0,9,25,11,8,0,7,0,0,5,0,6,12,13,0,19,16,26,20,0,21]
         else:
             gv.pin_map = [0,0,0,3,0,5,0,7,8,0,10,11,12,13,0,15,16,0,18,19,0,21,22,23,24,0,26,0,0,29,0,31,32,33,0,35,36,37,38,0,40]
     else:
         print 'Unknown pi pin revision.  Using pin mapping for rev 3'
-        # map 40 physical pins (1based) with 0 for pins that do not have a gpio number
+        # Map 40 physical pins (1based) with 0 for pins that do not have a gpio number.
         if gv.use_pigpio:
             gv.pin_map = [0,0,0,2,0,3,0,4,14,0,15,17,18,27,0,22,23,0,24,10,0,9,25,11,8,0,7,0,0,5,0,6,12,13,0,19,16,26,20,0,21]
         else:
@@ -71,28 +71,28 @@ try:
 
 except ImportError:
     try:
-        import Adafruit_BBIO.GPIO as GPIO  # Required for accessing General Purpose Input Output pins on Beagle Bone Black
+        import Adafruit_BBIO.GPIO as GPIO  # Required for accessing General Purpose Input Output pins on Beagle Bone Black.
         gv.platform = 'bo'
-        gv.pin_map = [None]*11 # map only the pins we are using
+        gv.pin_map = [None]*11 # Map only the pins we are using.
         gv.pin_map.extend(['P9_'+str(i) for i in range(11,17)])
     except ImportError:
         if os.name == 'nt':
             gv.platform = 'nt'
-            gv.pin_map = [i for i in range(27)] # simulate 26 pins all mapped.
+            gv.pin_map = [i for i in range(27)] # Simulate 26 pins all mapped.
         else:
             print 'Error: gpio_pins - No GPIO module loaded for {} platform'.format(os.name)
-            gv.platform = ''  # if no platform, allows program to still run.
-            gv.pin_map = [i for i in range(27)] # simulate 26 pins all mapped.
+            gv.platform = ''  # If no platform, allows program to still run.
+            gv.pin_map = [i for i in range(27)]  # Simulate 26 pins all mapped.
 
 ###
-#gv.platform and gv.pin_map are now defined correctly for the runtime of this module
+# gv.platform and gv.pin_map are now defined correctly for the runtime of this module.
 ###
 
 ###
-#fall through logic to define interface functions to control the hardware
+# Fall through logic to define interface functions to control the hardware.
 ###
 
-#the following two arrays paralell the gv.pin_map array
+# The following two arrays paralell the gv.pin_map array.
 claimed_gpio_pins = [False] * len(gv.pin_map) 
 shareable_gpio_pins = [False] * len(gv.pin_map) 
 
@@ -102,7 +102,7 @@ def map_gpio_pin(pinNum, shareable = False):
     Returns: reference to a device hardware port or None if not mappable.
     """
 
-    if gv.pin_map[pinNum]: #pin is mappable if not 0 or None
+    if gv.pin_map[pinNum]:  # Pin is mappable if not 0 or None.
         if claimed_gpio_pins[pinNum]:
             if shareable_gpio_pins[pinNum]:
                 return gv.pin_map[pinNum]
@@ -122,7 +122,7 @@ def unmap_gpio_pin(pinNum):
     shareable_gpio_pins[pinNum] = False
 
 
-if gv.platform == 'pi' and gv.use_pigpio:
+if gv.platform == 'pi' and gv.use_pigpio:  # pigpio support for pi only.
     try:
         import pigpio
         pi = pigpio.pi()
@@ -145,21 +145,21 @@ if gv.platform == 'pi' and gv.use_pigpio:
         def gp_read(pin):
             return pi.read(pin)
 
-        def gp_cleanup(header_pins = None): #untested
+        def gp_cleanup(header_pins = None):  # Untested.
             """
             Input: header_pins is list of integers corresponding
             to the hardware connector numbering.
             """
-            if header_pins == None:  #unmap all claimed pins
+            if header_pins == None:  # Unmap all claimed pins.
                   header_pins = [x for x in range(len(gv.pin_map))]
             for i in header_pins:
                 if claimed_gpio_pins[i]:
-                    gp_config_input(gv.pin_map[i]) #config pin as a high impedance input
+                    gp_config_input(gv.pin_map[i])  # Config pin as a high impedance input.
                     unmap_gpio_pin(i)
 
-    except ImportError: #assume default RPi libraries are available
+    except ImportError:  # Assume default RPi libraries are available.
         GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BOARD) #IO channels are identified by header connector pin numbers. Pin numbers are 
+        GPIO.setmode(GPIO.BOARD)  # IO channels are identified by header connector pin numbers.
 
         def gp_config_output(pin):
             GPIO.setup(pin, GPIO.OUT)
@@ -186,17 +186,17 @@ if gv.platform == 'pi' and gv.use_pigpio:
             Input: header_pins is list of integers corresponding
             to the hardware connector numbering.
             """
-            if header_pins == None:  #unmap all claimed pins
+            if header_pins == None:  # Unmap all claimed pins.
                   header_pins = [x for x in range(len(gv.pin_map))]
             for i in header_pins:
                 if claimed_gpio_pins[i]:
-                    gp_config_input(gv.pin_map[i]) #config pin as a high impedance input
+                    gp_config_input(gv.pin_map[i])  # Config pin as a high impedance input.
                     unmap_gpio_pin(i)
 
 elif gv.platform == 'pi' or gv.platform == 'bo':
     GPIO.setwarnings(False)
     if gv.platform == 'pi':
-        GPIO.setmode(GPIO.BOARD) #IO channels are identified by header connector pin numbers. Pin numbers are 
+        GPIO.setmode(GPIO.BOARD)  # IO channels are identified by header connector pin numbers.
 
     def gp_config_output(pin):
         GPIO.setup(pin, GPIO.OUT)
@@ -223,14 +223,14 @@ elif gv.platform == 'pi' or gv.platform == 'bo':
         Input: header_pins is list of integers corresponding
         to the hardware connector numbering.
         """
-        if header_pins == None:  #unmap all claimed pins
+        if header_pins == None:  # Unmap all claimed pins.
               header_pins = [x for x in range(len(gv.pin_map))]
         for i in header_pins:
             if claimed_gpio_pins[i]:
-                gp_config_input(gv.pin_map[i]) #config pin as a high impedance input
+                gp_config_input(gv.pin_map[i])  # Config pin as a high impedance input.
                 unmap_gpio_pin(i)
 
-elif gv.platform == 'nt' or gv.platform == '': #use simulated IO
+elif gv.platform == 'nt' or gv.platform == '':  # Use simulated IO.
     def gp_config_output(pin):
         pass
 
@@ -241,7 +241,7 @@ elif gv.platform == 'nt' or gv.platform == '': #use simulated IO
         pass
 
     def gp_read(pin):
-        return 1      #dummy return for simulation
+        return 1  # Dummy return for simulation.
 
     def gp_cleanup(header_pins = None):
         """
@@ -250,56 +250,51 @@ elif gv.platform == 'nt' or gv.platform == '': #use simulated IO
         runs truer to the actual code used to control physical hardware.
         """
 
-        if header_pins == None:  #unmap all claimed pins
+        if header_pins == None:  # Unmap all claimed pins.
               header_pins = [x for x in range(len(gv.pin_map))]
         for i in header_pins:
             if claimed_gpio_pins[i]:
-                gp_config_input(gv.pin_map[i]) #config pin as a high impedance input
+                gp_config_input(gv.pin_map[i])  # Config pin as a high impedance input.
                 unmap_gpio_pin(i)
 
-else: #Oppps! The dreaded configuration errror
+else:  # Oppps! The dreaded configuration errror.
     print 'Error: gpio_pins -- configuring platform "{}"'.format(gv.platform)
     print 'Should probably abort execution.'
 
 ###
-#platform specific runtime config is complete
+# platform specific runtime config is complete.
 ###
-
-###
-#Kludge: Pin allocation and setup should be moved out of gpio_pins
-#        Mapping should be done in the module that uses the pin(s).
-###
-global pin_rain_sense
 
 def config_pin_rain_sense():
-    if gv.platform == 'pi':  # If this will run on Raspberry Pi:
-        pin_rain_sense = map_gpio_pin(8,shareable=False)
-    elif gv.platform == 'bo':  # If this will run on Beagle Bone Black:
-        pin_rain_sense = map_gpio_pin(15,shareable=False)
-    else: #for simulation
-        pin_rain_sense = map_gpio_pin(5,shareable=False)
-    gp_config_input(pin_rain_sense, pullup='up')
-    return pin_rain_sense
+    if gv.platform == 'pi':  # If this will run on Raspberry Pi.
+        prs = map_gpio_pin(8,shareable=False)
+    elif gv.platform == 'bo':  # If this will run on Beagle Bone Black.
+        prs = map_gpio_pin(15,shareable=False)
+    else:  # For simulation.
+        prs = map_gpio_pin(5,shareable=False)
+    gp_config_input(prs, pullup='up')
+    return prs
 
-pin_rain_sense = config_pin_rain_sense()
-
-global pin_relay
 def config_pin_relay():
-    if gv.platform == 'pi':  # If this will run on Raspberry Pi:
-        pin_relay = map_gpio_pin(10,shareable=False)
-    elif gv.platform == 'bo':  # If this will run on Beagle Bone Black:
-        pin_relay = map_gpio_pin(16,shareable=False)
-    else: #for simulation
-        pin_relay = map_gpio_pin(6,shareable=False)
-    gp_config_output(pin_relay)
-    return pin_relay
+    if gv.platform == 'pi':  # If this will run on Raspberry Pi.
+        pr = map_gpio_pin(10,shareable=False)
+    elif gv.platform == 'bo':  # If this will run on Beagle Bone Black.
+        pr = map_gpio_pin(16,shareable=False)
+    else:  # For simulation.
+        pr = map_gpio_pin(6,shareable=False)
+    gp_config_output(pr)
+    return pr
+
+###
+# Kludge: Pin allocation and setup should be moved out of gpio_pins.
+#         Mapping should be done in the module that uses the pin(s).
+#  Note: use_gpio_pins does not effect use of relay.
+###
 
 pin_relay = config_pin_relay()
 
 from blinker import signal
 zone_change = signal('zone_change')
-
-
 
 def setup_pins():
     """
@@ -312,17 +307,17 @@ def setup_pins():
     global pin_sr_lat
 
     try:
-        if gv.platform == 'pi':  # If this will run on Raspberry Pi:
+        if gv.platform == 'pi':  # If this will run on Raspberry Pi.
             pin_sr_dat = map_gpio_pin(13,shareable=False)
             pin_sr_clk = map_gpio_pin(7,shareable=False)
             pin_sr_noe = map_gpio_pin(11,shareable=False)
             pin_sr_lat = map_gpio_pin(15,shareable=False)
-        elif gv.platform == 'bo':  # If this will run on Beagle Bone Black:
+        elif gv.platform == 'bo':  # If this will run on Beagle Bone Black.
             pin_sr_dat = map_gpio_pin(11,shareable=False)
             pin_sr_clk = map_gpio_pin(13,shareable=False)
             pin_sr_noe = map_gpio_pin(14,shareable=False)
             pin_sr_lat = map_gpio_pin(12,shareable=False)
-        else: #use simulated IO
+        else:  # Use simulated IO.
             pin_sr_dat = map_gpio_pin(1,shareable=False)
             pin_sr_clk = map_gpio_pin(2,shareable=False)
             pin_sr_noe = map_gpio_pin(3,shareable=False)
@@ -342,10 +337,11 @@ def setup_pins():
 
 def disableShiftRegisterOutput():
     """
-    Disable output from shift register.
+    Disable (tristate) output from shift register.
+    On first call initializes the hardware pins used for the shift reg.
     """
 
-    try:
+    try:  # Check to see if this is the first time this function is called.
         pin_sr_noe
     except NameError:
         if gv.use_gpio_pins:
@@ -395,8 +391,8 @@ def set_output():
     with gv.output_srvals_lock:
         gv.output_srvals = gv.srvals
         if gv.sd['alr']:
-            gv.output_srvals = [1-i for i in gv.output_srvals] #  invert logic of shift registers    
+            gv.output_srvals = [1-i for i in gv.output_srvals]  # Invert logic of shift registers.
         disableShiftRegisterOutput()
-        setShiftRegister(gv.output_srvals)  # gv.srvals stores shift register state
+        setShiftRegister(gv.output_srvals)  # gv.srvals stores shift register state.
         enableShiftRegisterOutput()
         zone_change.send()
