@@ -221,9 +221,7 @@ def check_rain():
     if not gv.use_gpio_pins:
         return
 
-    try:
-        pin_rain_sense
-    except NameError:
+    if not pin_rain_sense:
         pin_rain_sense = config_pin_rain_sense()
 
     try:
