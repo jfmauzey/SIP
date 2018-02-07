@@ -259,35 +259,3 @@ def sip_begin():
 if __name__ == '__main__':
 
     sip_begin()
-#    #########################################################
-#    #### Code to import all webpages and plugin webpages ####
-#
-#    import plugins
-#
-#    try:
-#        print _('plugins loaded:')
-#    except Exception:
-#        pass
-#    for name in plugins.__all__:
-#        print ' ', name
-#
-#    gv.plugin_menu.sort(key=lambda entry: entry[0])
-#
-#    #  Keep plugin manager at top of menu
-#    try:
-#        for i, item in enumerate(gv.plugin_menu):
-#            if '/plugins' in item:
-#                gv.plugin_menu.pop(i)
-#    except Exception:
-#        pass
-#    
-#    thread.start_new_thread(timing_loop, ())
-#
-#    if gv.use_gpio_pins:
-#        set_output()    
-#
-#
-#    app.notfound = lambda: web.seeother('/')
-#
-#    app.run()
-#
