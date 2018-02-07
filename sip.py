@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import i18n
-
 import subprocess
 import json
 import ast
@@ -223,8 +222,7 @@ template_globals = {
 
 template_render = web.template.render('templates', globals=template_globals, base='base')
 
-if __name__ == '__main__':
-
+def sip_begin():
     #########################################################
     #### Code to import all webpages and plugin webpages ####
 
@@ -256,3 +254,40 @@ if __name__ == '__main__':
     app.notfound = lambda: web.seeother('/')
 
     app.run()
+
+
+if __name__ == '__main__':
+
+    sip_begin()
+#    #########################################################
+#    #### Code to import all webpages and plugin webpages ####
+#
+#    import plugins
+#
+#    try:
+#        print _('plugins loaded:')
+#    except Exception:
+#        pass
+#    for name in plugins.__all__:
+#        print ' ', name
+#
+#    gv.plugin_menu.sort(key=lambda entry: entry[0])
+#
+#    #  Keep plugin manager at top of menu
+#    try:
+#        for i, item in enumerate(gv.plugin_menu):
+#            if '/plugins' in item:
+#                gv.plugin_menu.pop(i)
+#    except Exception:
+#        pass
+#    
+#    thread.start_new_thread(timing_loop, ())
+#
+#    if gv.use_gpio_pins:
+#        set_output()    
+#
+#
+#    app.notfound = lambda: web.seeother('/')
+#
+#    app.run()
+#
