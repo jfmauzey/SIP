@@ -1,4 +1,0 @@
-HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: application/json\r\nCache-Control: no-cache\r\nSet-Cookie: webpy_session_id=7cc83ff213d15f0f144237e5495c0591370da711; Path=/; httponly\r\nTransfer-Encoding: chunked\r\nDate: Thu, 25 Jan 2018 00:01:47 GMT\r\nServer: localhost\r\n\r\n'
-bytes sent = 281
-'16\r\n{"fwv": "3.2.31-OSPi"}\r\n'
-bytes sent 
