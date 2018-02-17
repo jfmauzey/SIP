@@ -30,9 +30,8 @@ from urls import urls  # Provides access to URLs for UI pages
 from gpio_pins import set_output
 from ReverseProxied import ReverseProxied
 
-# do not call set output until plugins are loaded because it should NOT be called
-# if gv.use_gpio_pins is False (which is set in relay board plugin.
-# set_output()
+# Start up sequence imports gv and creates the correct state for the valve
+# controller.
 
 gv.restarted = 1
 
