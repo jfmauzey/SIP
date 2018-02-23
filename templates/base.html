@@ -1,4 +1,4 @@
-$def with (content)
+﻿$def with (content)
 
 $code:
     snames = gv.snames
@@ -120,6 +120,7 @@ $code:
             var nprogs = ${len(gv.pd)};
             var sdt = ${gv.sd['sdt']};
             var seq = ${gv.sd['seq']};
+            var alr = ${gv.sd['alr']};
             var run_once = $:{json.dumps(_('Run-once'), ensure_ascii=False)};
             var man = $:{json.dumps(_('Manual'), ensure_ascii=False)};
             var program = $:{json.dumps(_('Program'), ensure_ascii=False)};

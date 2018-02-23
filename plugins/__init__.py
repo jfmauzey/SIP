@@ -6,8 +6,9 @@ import os
 import stat
 from os.path import dirname, join, split, splitext
 
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-
+#add parent directory to resolve intra-pkg references
+if not os.path.join(sys.path[0],'..') in sys.path:
+    sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 def isidentifier(s):  # to make this work with Python 2.7.
     if s in keyword.kwlist:

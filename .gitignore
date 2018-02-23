@@ -19,3 +19,8 @@ web/
 .vs/
 *.suo
 *.user
+/templates/relay_board.html
+/valve_controller
+/Output From locals.txt
+/RPiDebugOutputOnVisualStudio.txt
+/SIP1.pyproj

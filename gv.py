@@ -5,7 +5,6 @@
 ##############################
 #### Revision information ####
 import subprocess
-from threading import RLock
 
 major_ver = 3
 minor_ver = 2
@@ -25,21 +24,23 @@ except Exception:
     print _('Could not use git to determine date of last commit!')
     ver_date = '2015-01-09'
 
+
 #####################
 #### Global vars ####
 
-# Settings Dictionary. A set of vars kept in memory and persisted in a file.
-# Edit this default dictionary definition to add or remove "key": "value" pairs or change defaults.
-# note old passwords stored in the "pwd" option will be lost - reverts to default password.
+# Settings Dictionary.  A set of vars kept in memory and persisted in a file.
+# Edit this default dictionary definition to add or remove "key": "value" pairs
+# or change defaults.
+# note old passwords stored in the "pwd" option will be lost - reverts to
+# default password.
+import i18n
 from calendar import timegm
 import json
 import time
+from threading import RLock
 
-platform = ''  # Must be done before the following import because gpio_pins will try to set it.
-
-# from helpers import password_salt, password_hash, load_programs, station_names
-
-sd = {
+# Load the persistent gv.sd data from disk.
+sd = { #create defaults for initial dictionary
     u"en": 1,
     u"seq": 1,
     u"ir": [0],
@@ -82,24 +83,58 @@ sd = {
     u"lang": u"default",
     u"idd": 0,
     u"pigpio": 0,
-    u"alr":0
+    u"alr":0,
+    u"vct": u"default"
 }
 
-try:
-    with open('./data/sd.json', 'r') as sdf:  # A config file.
-        sd_temp = json.load(sdf)
-    for key in sd:  # If file loaded, replce default values in sd with values from file.
-        if key in sd_temp:
-            sd[key] = sd_temp[key]
-except IOError:  # If file does not exist, it will be created using defaults.
-    with open('./data/sd.json', 'w') as sdf:  # Save file.
-        json.dump(sd, sdf, indent=4, sort_keys=True)
+try: # Load sd with content from persistent storage.
+    with open('./data/sd.json', 'r') as sdf:
+        try:
+            sd_temp = json.load(sdf)
+        except ValueError as e:
+            print 'Error: JSON fails to parse "./data/sd.json resetting to defaults"'
+            print e
+            try:
+                with open('./data/sd.json', 'w') as sdf:  # save sd to file
+                    json.dump(sd, sdf, indent=4, sort_keys=True)
+            except IOError:
+                # Should this be fatal -- persistent config fails.  All config
+                # set to defaults.
+                print 'Error: unable to read or write config file "./data/sd.json"'
+
+        else: # Use data read from persistent storage to override defaults.
+            for key in sd:
+                if key in sd_temp:  # Replace default values in sd with values from file.
+                    sd[key] = sd_temp[key]
+
+except IOError:  # File does not exist.
+    try: # Create file using defaults.
+        with open('./data/sd.json', 'w') as sdf:  # Save file.
+            json.dump(sd, sdf, indent=4, sort_keys=True)
+    except IOError:
+        # Should this be fatal -- persistent config fails.  All config
+        # set only by defaults. No persistent user config.
+        print 'Error: unable to write config to "./data/sd.json"'
+
+
+# Setup gv properties not stored on disk.
+
+#Valve Controller instance or None
+vc = None    
+
+# Hardware setup and ownership is done using config file and plugins setup.
+# use_gpio_pins is kludge to force bit_bang shift register to not affect any
+# I/O interfaces to allow the plugin relay_board to assume ownership of
+# valve interface.
+# Allow gpio use for bit_bang shift register. No effect on rain_sense or relay.
+use_gpio_pins = True
 
 use_pigpio = sd['pigpio']
+platform = ''  # Must be done before the following import because gpio_pins
+               # will try to set it.
 
 from helpers import load_programs, station_names
 
-nowt = time.localtime()
 now = timegm(nowt)
 tz_offset = int(time.time() - timegm(time.localtime()))  # Compatible with Javascript (negative tz shown as positive value).
 plugin_menu = []  # Empty list of lists for plugin links (e.g. ['name', 'URL']).
@@ -125,9 +160,6 @@ for j in range(sd['nst']):
 lrun = [0, 0, 0, 0]  # Station index, program number, duration, end time (Used in UI).
 scount = 0  # Station count, used in set station to track on stations with master association.
 
-# Allow gpio use for bit_bang shift register and rain_sense. No effect on relay.
-use_gpio_pins = True
-
 options = [
     [_("System name"), "string", "name", _("Unique name of this SIP system."), _("System")],
     [_("Location"), "string", "loc", _("City name or zip code. Use comma or + in place of space."), _("System")],
@@ -146,6 +178,7 @@ options = [
     [_("Extension boards"), "int", "nbrd", _("Number of extension boards."), _("Station Handling")],
     [_("Station delay"), "int", "sdt", _("Station delay time (in seconds), between 0 and 240."), _("Station Handling")],
     [_("Active-Low Relay"), "boolean", "alr", _("Using active-low relay boards connected through shift registers"), _("Station Handling")],
+    [_("Valve Controller"), "vc_enum", "vct", _("Specifies hardware interface for relay boards"), _("Station Handling")],
     [_("Master station"), "int", "mas",_( "Select master station."), _("Configure Master")],
     [_("Master on adjust"), "int", "mton", _("Master on delay (in seconds), between +0 and +60."), _("Configure Master")],
     [_("Master off adjust"), "int", "mtoff", _("Master off delay (in seconds), between -60 and +60."), _("Configure Master")],

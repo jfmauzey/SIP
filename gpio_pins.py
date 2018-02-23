@@ -288,7 +288,7 @@ def config_pin_relay():
 ###
 # Kludge: Pin allocation and setup should be moved out of gpio_pins.
 #         Mapping should be done in the module that uses the pin(s).
-#  Note: use_gpio_pins does not effect use of relay.
+#  Note: use_gpio_pins does not effect use of pin_relay or pin_rain_sense.
 ###
 
 pin_relay = config_pin_relay()
@@ -296,103 +296,14 @@ pin_relay = config_pin_relay()
 from blinker import signal
 zone_change = signal('zone_change')
 
-def setup_pins():
-    """
-    Define and setup GPIO pins for shift register operation
-    """
-
-    global pin_sr_dat
-    global pin_sr_clk
-    global pin_sr_noe
-    global pin_sr_lat
-
-    try:
-        if gv.platform == 'pi':  # If this will run on Raspberry Pi.
-            pin_sr_dat = map_gpio_pin(13,shareable=False)
-            pin_sr_clk = map_gpio_pin(7,shareable=False)
-            pin_sr_noe = map_gpio_pin(11,shareable=False)
-            pin_sr_lat = map_gpio_pin(15,shareable=False)
-        elif gv.platform == 'bo':  # If this will run on Beagle Bone Black.
-            pin_sr_dat = map_gpio_pin(11,shareable=False)
-            pin_sr_clk = map_gpio_pin(13,shareable=False)
-            pin_sr_noe = map_gpio_pin(14,shareable=False)
-            pin_sr_lat = map_gpio_pin(12,shareable=False)
-        else:  # Use simulated IO.
-            pin_sr_dat = map_gpio_pin(1,shareable=False)
-            pin_sr_clk = map_gpio_pin(2,shareable=False)
-            pin_sr_noe = map_gpio_pin(3,shareable=False)
-            pin_sr_lat = map_gpio_pin(4,shareable=False)
-
-        gp_config_output(pin_sr_noe)
-        gp_config_output(pin_sr_clk)
-        gp_config_output(pin_sr_dat)
-        gp_config_output(pin_sr_lat)
-        gp_write(pin_sr_noe,1)
-        gp_write(pin_sr_clk,0)
-        gp_write(pin_sr_dat,0)
-        gp_write(pin_sr_lat,0)
-            
-    except AttributeError:
-        pass
-
-def disableShiftRegisterOutput():
-    """
-    Disable (tristate) output from shift register.
-    On first call initializes the hardware pins used for the shift reg.
-    """
-
-    try:  # Check to see if this is the first time this function is called.
-        pin_sr_noe
-    except NameError:
-        if gv.use_gpio_pins:
-            setup_pins()
-    try:
-        gp_write(pin_sr_noe, 1)
-    except Exception:
-        pass
-
-
-def enableShiftRegisterOutput():
-    """
-    Enable output from shift register.
-    """
-
-    try:
-        gp_write(pin_sr_noe, 0)
-    except Exception:
-        pass
-
-
-def setShiftRegister(srvals):
-    """
-    Set the state of each output pin on the shift register from the srvals list.
-    """
-
-    try:
-        gp_write(pin_sr_clk, 0)
-        gp_write(pin_sr_lat, 0)
-        for s in range(gv.sd['nst']):
-            gp_write(pin_sr_clk, 0)
-            if srvals[gv.sd['nst']-1-s]:
-                gp_write(pin_sr_dat, 1)
-            else:
-                gp_write(pin_sr_dat, 0)
-            gp_write(pin_sr_clk, 1)
-        gp_write(pin_sr_lat, 1)
-    except Exception:
-        pass
-
-
 def set_output():
     """
     Write contents of shift register to the valve controller hardware outputs.
+    Sends a Blinker zone_change signal.
     """
 
     with gv.output_srvals_lock:
         gv.output_srvals = gv.srvals
-        if gv.sd['alr']:
-            gv.output_srvals = [1-i for i in gv.output_srvals]  # Invert logic of shift registers.
-        disableShiftRegisterOutput()
-        setShiftRegister(gv.output_srvals)  # gv.srvals stores shift register state.
-        enableShiftRegisterOutput()
+        if gv.vc:  # valve controller is enabled
+          gv.vc.set_output(gv.output_srvals)
         zone_change.send()

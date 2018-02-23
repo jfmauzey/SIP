@@ -191,6 +191,7 @@ def timing_loop():
         #### End of timing loop ####
 
 
+### setup the web app
 class SIPApp(web.application):
     """Allow program to select HTTP port."""
 
@@ -201,7 +202,6 @@ class SIPApp(web.application):
 
 
 app = SIPApp(urls, globals())
-#  disableShiftRegisterOutput()
 web.config.debug = False  # Improves page load speed
 if web.config.get('_session') is None:
     web.config._session = web.session.Session(app, web.session.DiskStore('sessions'),
@@ -243,14 +243,27 @@ def sip_begin():
                 gv.plugin_menu.pop(i)
     except Exception:
         pass
-    
+
+    # plugins may override default/persistent valve controller.
+    if gv.sd['vct']:
+        from valve_controller import vc_types
+        if gv.sd['vct'] in vc_types:
+            vc_class = vc_types[gv.sd['vct']]
+            if vc_class == None:
+                print 'Valve Controller is disabled.'
+                gv.vc = None
+            else: 
+                gv.vc = vc_class(gv.sd['nst'], gv.sd['alr'])
+        else:
+            print 'Currently specified Valve Controller ({})'.format(gv.sd['vct'])
+            print 'is not in vc_types.'
+            print vc_types.keys()
+    else:
+        print "gv.sd['vct'] not set. Valve Controller is disabled."
+        gv.vc = None
+
+
     thread.start_new_thread(timing_loop, ())
-
-    if gv.use_gpio_pins:
-        set_output()    
-
-
-    app.notfound = lambda: web.seeother('/')
 
     app.run()
 

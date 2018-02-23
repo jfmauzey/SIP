@@ -28,6 +28,7 @@ rs:0	rain sensed (bool)
 nopts:14 Number of optiions to be displayed
 name:"SIP"	configurable name for system
 snlen:32 max size of station names
+vct:"default" Specifies type of Valve Controller to create
 idd:0   individual run times
 
 for scheduling:
