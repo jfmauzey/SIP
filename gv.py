@@ -135,6 +135,7 @@ platform = ''  # Must be done before the following import because gpio_pins
 
 from helpers import load_programs, station_names
 
+nowt = time.localtime()
 now = timegm(nowt)
 tz_offset = int(time.time() - timegm(time.localtime()))  # Compatible with Javascript (negative tz shown as positive value).
 plugin_menu = []  # Empty list of lists for plugin links (e.g. ['name', 'URL']).

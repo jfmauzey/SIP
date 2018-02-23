@@ -265,6 +265,8 @@ def sip_begin():
 
     thread.start_new_thread(timing_loop, ())
 
+    app.notfound = lambda: web.seeother('/')
+
     app.run()
 
 
