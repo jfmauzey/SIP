@@ -491,49 +491,6 @@ def read_log():
         return result
 
 
-def jsave(data, fname):
-    """
-    Save data to a json file.
-    
-    
-    """
-    with open('./data/' + fname + '.json', 'w') as f:
-        json.dump(data, f, indent=4, sort_keys=True)
-
-
-def station_names():
-    """
-    Load station names from /data/stations.json file if it exists
-    otherwise create file with defaults.
-    
-    Return station names as a list.
-    
-    """
-    try:
-        with open('./data/snames.json', 'r') as snf:
-            return json.load(snf)
-    except IOError:
-        stations = [u"S01", u"S02", u"S03", u"S04", u"S05", u"S06", u"S07", u"S08"]
-        jsave(stations, 'snames')
-        return stations
-
-
-def load_programs():
-    """
-    Load program data into memory from /data/programs.json file if it exists.
-    otherwise create an empty programs data list (gv.pd).
-    
-    """
-    try:
-        with open('./data/programs.json', 'r') as pf:
-            gv.pd = json.load(pf)
-    except IOError:
-        gv.pd = []  # A config file -- return default and create file if not found.
-        with open('./data/programs.json', 'w') as pf:
-            json.dump(gv.pd, pf, indent=4, sort_keys=True)
-    return gv.pd
-
-
 def password_salt():
     """
     Generate random number for use as salt for password encryption

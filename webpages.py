@@ -11,8 +11,7 @@ import ast
 import gv
 from helpers import *
 from gpio_pins import set_output
-from valve_controller import vc_types
-from valve_controller.valve_controller_factory import ValveControllerFactory
+from valve_controller import *
 from sip import template_render
 from blinker import signal
 
@@ -180,50 +179,52 @@ class change_options(ProtectedPage):
                 self.update_scount(qdict)
                 gv.sd['nbrd'] = int(qdict['onbrd']) + 1
                 gv.sd['nst'] = gv.sd['nbrd'] * 8
-                gv.vc.setNumberStations(gv.sd['nst'])
+                if gv.vc:
+                    gv.vc.setNumberStations(gv.sd['nst'])
 
         if 'oalr' in qdict: #only checked box reported
             if (qdict['oalr'] == 1 or qdict['oalr'] == 'on') and gv.sd['alr'] != 1:
                 gv.sd['alr'] = 1
-                gv.vc.setActiveLow()
+                if gv.vc:
+                  gv.vc.setActiveLow()
             elif (qdict['oalr'] == 0 or qdict['oalr'] == 'off') and gv.sd['alr'] != 0:
                 print "this code should never execute because only checked boxes are reported"
                 gv.sd['alr'] = 0
-                gv.vc.setActiveHigh()
+                if gv.vc:
+                    gv.vc.setActiveHigh()
         elif gv.sd['alr'] == 1: #only checked box reported
             gv.sd['alr'] = 0
-            gv.vc.setActiveHigh()
+            if gv.vc:
+                gv.vc.setActiveHigh()
 
-        if 'ovct' in qdict: #no error checking yet
+        if 'ovct' in qdict: # Valve Controller configuration
             if gv.sd['vct'] in vc_types:
                 if qdict['ovct'] in vc_types:
-                    if qdict['ovct'] != gv.sd['vct']: #vc may have changed
-                        gv.vc.cleanup_hw() #release any hardware resources held by current vc
-                        del (gv.vc)
-                        gv.vc = None
-                        if qdict['ovct'] == 'default':
-                            if gv.sd['vct'] != vc_types['default']:
-                                gv.sd['vct'] = vc_types['default']
-                                gv.vc = ValveControllerFactory(gv.sd['vct'], gv.sd['nst'], gv.sd['alr'])
-                        else:
-                            gv.sd['vct'] = qdict['ovct']
-                            gv.vc = ValveControllerFactory(gv.sd['vct'], gv.sd['nst'], gv.sd['alr'])
+                    if qdict['ovct'] != gv.sd['vct']: # vc changed unless it's None.
+                        if gv.vc:
+                            gv.vc.cleanup_hw() # Force release of hardware resources held by current vc.
+                            gv.vc = None
+                        gv.sd['vct'] = qdict['ovct']
+                        ValveController = vc_types[gv.sd['vct']] # class constructor or None.
+                        if ValveController:  # Create new instance.
+                            gv.vc = ValveController(gv.sd['nst'], gv.sd['alr']) 
                 else:
-                    #Selected type returned by client not valid for installed Valve Controllers
+                    # Selected type returned by client not valid for installed Valve Controllers.
                     print "Error: selected Valve Controller ({}) not listed in installed Valve Controller Types\n".format(gv.sd['vct'])
                     # ??Should this be fatal error??
-                    gv.sd['vct'] = 'virtual'
-                    gv.vc = ValveControllerFactory('virtual', gv.sd['nst'], gv.sd['alr'])
+                    gv.sd['vct'] = 'vc_sim'
+                    ValveController = vc_types[gv.sd['vct']]
+                    gv.vc = ValveController(gv.sd['nst'], gv.sd['alr'])
 
             else: #Currently specified vc not installed in vc_types (e.g. outdated config file)
-                if gv.sd['vct'] == vc_types['default']:
-                    gv.sd['vct'] = 'virtual'
-                    gv.vc = ValveControllerFactory('virtual', gv.sd['nst'], gv.sd['alr'])
-                    print "Error: Default Valve Controller missing {} Valve Controller Interface".format(gv.sd['vct'])
-                    # ??should this be fatal??
-                else:
-                    gv.sd['vct'] = vc_types['default']
-                    gv.vc = ValveControllerFactory(vc_types['default'], gv.sd['nst'], gv.sd['alr'])
+                print "Error: Default Valve Controller missing {} Valve Controller Interface".format(gv.sd['vct'])
+                # ??should this be fatal??
+                print "       Valve Controller set to None.".format(gv.sd['vct'])
+                if gv.vc: # This code should never execute because gv.sd['vct'] references non-existant type
+                    gv.vc.cleanup_hw() # Force release of hardware resources held by current vc.
+                    gv.vc = None
+                gv.sd['vct'] = 'disable'
+                gv.vc = None
 
         if 'ohtp' in qdict:
             if 'htp' not in gv.sd or gv.sd['htp'] != int(qdict['ohtp']):

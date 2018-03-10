@@ -1,15 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from gpio_pins import map_gpio_pin, config_gpio_output, gp_write, gp_cleanup
-import gv
-
 from __future__ import print_function
 
-vc_types = {
-    'bbsr' : BBSR,
-    'disabled' : None,
-    'default' : BBSR,
-    }
+from gpio_pins import map_gpio_pin, gp_config_output, gp_write, gp_cleanup
+import gv
 
 class ValveController(object):
     """
@@ -65,6 +59,10 @@ class BBSR(ValveController):
     BBSR uses four gpio pins to interface to a shift register implemented
     using one or more 74HC595 discreet parts. There is no feedback from the
     shift register to know if the 74HC595 device(s) is attached.
+
+    When the number of stations changes (gv.sd['nst']) no configuration
+    of the existing shift register needs to change. A call to set_output
+    will shift the changed number of bits to the hardware.
     """
     def __init__(self, nst = 8, alr = False, quiet=True):
         super(BBSR, self).__init__(nst, alr, quiet)
@@ -138,10 +136,10 @@ class BBSR(ValveController):
         self.pin_sr_lat = map_gpio_pin(self.pins['pin_sr_lat'], shareable=False)
 
         # Initialize hardware control for the gpio pins.
-        config_gpio_output(self.pin_sr_noe)
-        config_gpio_output(self.pin_sr_clk)
-        config_gpio_output(self.pin_sr_dat)
-        config_gpio_output(self.pin_sr_lat)
+        gp_config_output(self.pin_sr_noe)
+        gp_config_output(self.pin_sr_clk)
+        gp_config_output(self.pin_sr_dat)
+        gp_config_output(self.pin_sr_lat)
 
         ### Initial state for shift reg control pins.
         self._write1(self.pin_sr_noe)
@@ -154,11 +152,11 @@ class BBSR(ValveController):
         gp_cleanup(pins)
 
     def __del__(self):
-        pins = [pin for pin in self.pins.itervalues()]
-        gp_cleanup(pins)
+        cleanup_hw()
 
     def __str__(self):
          return 'bbsr: Bit Banged Shift Register'
+
 
 class VC_SIM(ValveController):
     """
@@ -171,8 +169,7 @@ class VC_SIM(ValveController):
          How programs multiple programs behave when using seq or concurrent mode.
          How manual mode interacts with program scheduling.
     """
-        self._setup_pins()
-        self.set_output([0] * self.nst)
+
     def __init__(self,nst=8, alr = False, quiet = False):
         super(VC_SIM, self).__init__(nst, alr, quiet)
         self._setup_pins()
@@ -183,9 +180,7 @@ class VC_SIM(ValveController):
         gp_cleanup(pins)
 
     def __del__(self):
-        pins = [pin for pin in self.pins.itervalues()]
-        gp_cleanup(pins)
-        super(VC_SIM, self).__del__()
+        cleanup_hw()
 
     def __str__(self):
         return 'vc_sim: Simulated Valve Controller sans hardware'
@@ -243,17 +238,16 @@ class VC_SIM(ValveController):
         self.pin_sr_lat = map_gpio_pin(self.pins['pin_sr_lat'], shareable=False)
 
         # Initialize hardware control for the gpio pins.
-        config_gpio_output(self.pin_sr_noe)
-        config_gpio_output(self.pin_sr_clk)
-        config_gpio_output(self.pin_sr_dat)
-        config_gpio_output(self.pin_sr_lat)
+        gp_config_output(self.pin_sr_noe)
+        gp_config_output(self.pin_sr_clk)
+        gp_config_output(self.pin_sr_dat)
+        gp_config_output(self.pin_sr_lat)
 
         ### Initial state for shift reg control pins.
         self._write1(self.pin_sr_noe)
         self._write0(self.pin_sr_clk)
         self._write0(self.pin_sr_dat)
         self._write0(self.pin_sr_lat)
-
 
 ###
 # vc_types maps the Valve Controller name (key) to the class constructor.
@@ -265,3 +259,6 @@ vc_types = {
     'default' : BBSR,
     'vc_sim' : VC_SIM
     }
+
+
+__all__ = ['BBSR', 'VC_SIM', 'vc_types']

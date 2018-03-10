@@ -14,6 +14,7 @@ sys.path.append('./plugins')
 import web  # the Web.py module. See webpy.org (Enables the Python SIP web interface)
 
 import gv
+from gv import jsave, station_names
 from helpers import (
                      report_station_completed, 
                      plugin_adjustment, 
@@ -22,8 +23,6 @@ from helpers import (
                      log_run, 
                      stop_onrain, 
                      check_rain, 
-                     jsave, 
-                     station_names, 
                      get_rpi_revision
                      )
 from urls import urls  # Provides access to URLs for UI pages
@@ -221,6 +220,7 @@ template_globals = {
 
 template_render = web.template.render('templates', globals=template_globals, base='base')
 
+from valve_controller import *
 def sip_begin():
     #########################################################
     #### Code to import all webpages and plugin webpages ####
@@ -246,7 +246,6 @@ def sip_begin():
 
     # plugins may override default/persistent valve controller.
     if gv.sd['vct']:
-        from valve_controller import vc_types
         if gv.sd['vct'] in vc_types:
             vc_class = vc_types[gv.sd['vct']]
             if vc_class == None:

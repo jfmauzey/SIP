@@ -87,44 +87,109 @@ sd = { #create defaults for initial dictionary
     u"vct": u"default"
 }
 
-try: # Load sd with content from persistent storage.
-    with open('./data/sd.json', 'r') as sdf:
-        try:
-            sd_temp = json.load(sdf)
-        except ValueError as e:
-            print 'Error: JSON fails to parse "./data/sd.json resetting to defaults"'
-            print e
+
+###
+# Functions to deal with persistent storage used for user configurable
+# options and preferences.
+###
+
+def update_default_sd():
+    """
+    Load default overrides from persitent storage "data/sd.json"
+    Will overwrite any value in gv.sd[] with the value retrieved
+    from the persistent file.
+    """
+    global sd
+
+    try: # Load sd with content from persistent storage.
+        with open('./data/sd.json', 'r') as sdf:
             try:
-                with open('./data/sd.json', 'w') as sdf:  # save sd to file
-                    json.dump(sd, sdf, indent=4, sort_keys=True)
-            except IOError:
-                # Should this be fatal -- persistent config fails.  All config
-                # set to defaults.
-                print 'Error: unable to read or write config file "./data/sd.json"'
+                sd_temp = json.load(sdf)
+            except ValueError as e:
+                print 'Error: JSON fails to parse "./data/sd.json resetting to defaults"'
+                print e
+                try:
+                    with open('./data/sd.json', 'w') as sdf:  # save sd to file
+                        json.dump(sd, sdf, indent=4, sort_keys=True)
+                except IOError:
+                    # Should this be fatal -- persistent config fails.  All config
+                    # set to defaults.
+                    print 'Error: unable to read or write config file "./data/sd.json"'
 
-        else: # Use data read from persistent storage to override defaults.
-            for key in sd:
-                if key in sd_temp:  # Replace default values in sd with values from file.
-                    sd[key] = sd_temp[key]
+            else: # Use data read from persistent storage to override defaults.
+                for key in sd:
+                    if key in sd_temp:  # Replace default values in sd with values from file.
+                        sd[key] = sd_temp[key]
 
-except IOError:  # File does not exist.
-    try: # Create file using defaults.
-        with open('./data/sd.json', 'w') as sdf:  # Save file.
-            json.dump(sd, sdf, indent=4, sort_keys=True)
+    except IOError:  # File does not exist.
+        try: # Create file using defaults.
+            with open('./data/sd.json', 'w') as sdf:  # Save file.
+                json.dump(sd, sdf, indent=4, sort_keys=True)
+        except IOError:
+            # Should this be fatal -- persistent config fails.  All config
+            # set only by defaults. No persistent user config.
+            print 'Error: unable to write config to "./data/sd.json"'
+
+
+def jsave(data, fname):
+    """
+    Save data to a json file.
+    """
+    with open('./data/' + fname + '.json', 'w') as f:
+        json.dump(data, f, indent=4, sort_keys=True)
+
+
+def station_names():
+    """
+    Load station names from  data/stations.json file if it exists
+    otherwise create file with defaults.
+    
+    Return station names as a list.
+    Does not trap write errors if failure to write to persistent storage.
+    """
+    try:
+        with open('./data/snames.json', 'r') as snf:
+            return json.load(snf)
     except IOError:
-        # Should this be fatal -- persistent config fails.  All config
-        # set only by defaults. No persistent user config.
-        print 'Error: unable to write config to "./data/sd.json"'
+        stations = [u"S01", u"S02", u"S03", u"S04", u"S05", u"S06", u"S07", u"S08"]
+        jsave(stations, 'snames')
+        return stations
 
 
+def load_programs():
+    """
+    Load program data into memory from /data/programs.json file if it exists.
+    otherwise create an empty programs data list.
+    
+    Return program data list (gv.pd).
+    Does not trap write errors if failure to write to persistent storage.
+    """
+    try:
+        with open('./data/programs.json', 'r') as pf:
+            pd = json.load(pf)
+    except IOError:
+        pd = []  # A config file -- return default and create file if not found.
+        with open('./data/programs.json', 'w') as pf:
+            json.dump(gv.pd, pf, indent=4, sort_keys=True)
+    return pd
+
+
+###
+# Load user configurable defaults from persistent storage.
+###
+
+update_default_sd()       # Override default sd[] with values from ./data/sd.json.
+snames = station_names()  # Load station names from ./data/snames.json.
+pd = load_programs()      # Load program data from ./data/programs.json.
+
+
+###
 # Setup gv properties not stored on disk.
-
-#Valve Controller instance or None
-vc = None    
+###
 
 # Hardware setup and ownership is done using config file and plugins setup.
 # use_gpio_pins is kludge to force bit_bang shift register to not affect any
-# I/O interfaces to allow the plugin relay_board to assume ownership of
+# I/O interfaces.  e.g. allow the plugin relay_board to assume ownership of
 # valve interface.
 # Allow gpio use for bit_bang shift register. No effect on rain_sense or relay.
 use_gpio_pins = True
@@ -132,8 +197,6 @@ use_gpio_pins = True
 use_pigpio = sd['pigpio']
 platform = ''  # Must be done before the following import because gpio_pins
                # will try to set it.
-
-from helpers import load_programs, station_names
 
 nowt = time.localtime()
 now = timegm(nowt)
@@ -144,8 +207,6 @@ srvals = [0] * (sd['nst'])  # Shift Register values.
 output_srvals = [0] * (sd['nst'])  # Shift Register values last set by set_output().
 output_srvals_lock = RLock()
 rovals = [0] * sd['nbrd'] * 7  # Run Once durations.
-snames = station_names()  # Load station names from file.
-pd = load_programs()  # Load program data from file.
 plugin_data = {}  # Empty dictionary to hold plugin based global data.
 ps = []  # Program schedule (used for UI display).
 for i in range(sd['nst']):
@@ -161,6 +222,11 @@ for j in range(sd['nst']):
 lrun = [0, 0, 0, 0]  # Station index, program number, duration, end time (Used in UI).
 scount = 0  # Station count, used in set station to track on stations with master association.
 
+vc = None    # Valve Controller instance or None
+
+###
+# The options list configures paramaters for the web GUI.
+###
 options = [
     [_("System name"), "string", "name", _("Unique name of this SIP system."), _("System")],
     [_("Location"), "string", "loc", _("City name or zip code. Use comma or + in place of space."), _("System")],
