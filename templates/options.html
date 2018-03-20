@@ -86,6 +86,13 @@ $code:
         output = ""
         oldcategory = ""
         categoryCloser = ""
+        vc_info = {}
+        for vcStrName, vcClass in gv.vc_types.items():
+            if vcClass == None:
+                vc_info[vcStrName] = 'Valve Controller disabled'
+            else:
+                vc_info[vcStrName] = vcClass.descrip()
+    
         for opt in opts:
             label = opt[0]
             datatype = opt[1]
@@ -133,10 +140,10 @@ $code:
                 output += "<input name='onbrd' type='text' size='3' maxlength='3' value='" + str(value - 1) + "'>\n"           
             elif name == "vct":
                 output += "<select name= 'ovct'>\n"
-                output += "<option " + ("selected " if value=='default' else "") + "value='default'>"+_('Default ')+gv.vc_types['default']+"</option>\n"
-                for T in gv.vc_types:
+                output += "<option " + ("selected " if value=='default' else "") + "value='default'>"+_('Default ')+vc_info['default']+"</option>\n"
+                for T in vc_info:
                     if T == 'default': continue
-                    output += "<option " + ("selected " if value==T else "") + "value='"+T+"'>"+gv.vc_types[T]+"</option>\n"
+                    output += "<option " + ("selected " if value==T else "") + "value='"+T+"'>"+vc_info[T]+"</option>\n"
                 output += "</select>\n"
             elif name == "mton":    
                 output += "<input name='omton' type='text' size='3' maxlength='3' value='" + str(value) + "'><span class='inputError' id='error" + name + "'></span>\n"           

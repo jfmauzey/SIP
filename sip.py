@@ -221,6 +221,10 @@ template_globals = {
 template_render = web.template.render('templates', globals=template_globals, base='base')
 
 from valve_controller import *
+
+# Make vc_types globally accessible
+gv.vc_types = vc_types
+
 def sip_begin():
     #########################################################
     #### Code to import all webpages and plugin webpages ####

@@ -127,7 +127,7 @@ class change_values(ProtectedPage):
                 gv.sd[key] = int(qdict[key])
             except Exception:
                 pass
-        jsave(gv.sd, 'sd')
+        gv.jsave(gv.sd, 'sd')
         report_value_change()
         raise web.seeother('/')  # Send browser back to home page
 
@@ -243,7 +243,7 @@ class change_options(ProtectedPage):
             else:
                 gv.sd[f] = 0
 
-        jsave(gv.sd, 'sd')
+        gv.jsave(gv.sd, 'sd')
         report_option_change()
         if 'rbt' in qdict and qdict['rbt'] == '1':
             gv.srvals = [0] * (gv.sd['nst'])
@@ -291,7 +291,7 @@ class change_options(ProtectedPage):
             gv.rs = gv.rs[:newlen]
             gv.snames = gv.snames[:newlen]
             gv.sbits = gv.sbits[:onbrd + 1]
-        jsave(gv.snames, 'snames')
+        gv.jsave(gv.snames, 'snames')
 
 
 class view_stations(ProtectedPage):
@@ -340,8 +340,8 @@ class change_stations(ProtectedPage):
             else:
                 names.append('S'+"{:0>2d}".format(i+1))
         gv.snames = names
-        jsave(names, 'snames')
-        jsave(gv.sd, 'sd')
+        gv.jsave(names, 'snames')
+        gv.jsave(gv.sd, 'sd')
         report_station_names()
         raise web.seeother('/')
 
@@ -478,7 +478,7 @@ class change_program(ProtectedPage):
             gv.pd.append(cp)
         else:
             gv.pd[int(qdict['pid'])] = cp  # replace program
-        jsave(gv.pd, 'programs')
+        gv.jsave(gv.pd, 'programs')
         gv.sd['nprogs'] = len(gv.pd)
         report_program_change()
         raise web.seeother('/vp')
@@ -491,10 +491,10 @@ class delete_program(ProtectedPage):
         qdict = web.input()
         if qdict['pid'] == '-1':
             del gv.pd[:]
-            jsave(gv.pd, 'programs')
+            gv.jsave(gv.pd, 'programs')
         else:
             del gv.pd[int(qdict['pid'])]
-        jsave(gv.pd, 'programs')
+        gv.jsave(gv.pd, 'programs')
         gv.sd['nprogs'] = len(gv.pd)
         report_program_deleted()
         raise web.seeother('/vp')
@@ -506,7 +506,7 @@ class enable_program(ProtectedPage):
     def GET(self):
         qdict = web.input()
         gv.pd[int(qdict['pid'])][0] = int(qdict['enable'])
-        jsave(gv.pd, 'programs')
+        gv.jsave(gv.pd, 'programs')
         report_program_toggle()
         raise web.seeother('/vp')
 
@@ -569,7 +569,7 @@ class toggle_temp(ProtectedPage):
             gv.sd['tu'] = "F"
         else:
             gv.sd['tu'] = "C"
-        jsave(gv.sd, 'sd')
+        gv.jsave(gv.sd, 'sd')
         raise web.seeother('/')
 
 

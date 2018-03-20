@@ -195,8 +195,8 @@ pd = load_programs()      # Load program data from ./data/programs.json.
 use_gpio_pins = True
 
 use_pigpio = sd['pigpio']
-platform = ''  # Must be done before the following import because gpio_pins
-               # will try to set it.
+platform = ''  # Must be defined before importing gpio_pins where it is set.
+vc_types = None # Will be copy of vc_types defined in valve_controller.
 
 nowt = time.localtime()
 now = timegm(nowt)

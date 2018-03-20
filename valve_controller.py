@@ -7,6 +7,10 @@ import gv
 
 class ValveController(object):
     """
+    This base class defines the model that each instance of a ValveController
+    must duplicate. Hardware valve interfaces and the simulated valve
+    interfaces derive from this base class.
+
     Models the hardware interface that controls irrigation valve relays.
     Each valve controller has a set of attributes that define the stations
     controlled by the hardware. The number of stations may be modified by
@@ -39,10 +43,10 @@ class ValveController(object):
         self._off = self._write0
 
     def _write0(self,pin):
-        self._dbg("Simulated write 0 to pin {}".format(pin))
+        self._dbg("write 0 to virtual pin {}".format(pin))
 
     def _write1(self,pin):
-        self._dgb("Simulated write 1 to pin {}".format(pin))
+        self._dgb("write 1 to virtual pin {}".format(pin))
 
     def setNumberStations(self, nst):
         self.nst = nst
@@ -52,6 +56,13 @@ class ValveController(object):
 
     def cleanup_hw(self):
         pass
+
+    @classmethod
+    def descrip(cls):
+        return 'virtual: Virtual Shift Register'
+
+    def __str__(self):
+        return 'virtual: Virtual Shift Register'
 
 
 class BBSR(ValveController):
@@ -151,11 +162,15 @@ class BBSR(ValveController):
         pins = [pin for pin in self.pins.itervalues()]
         gp_cleanup(pins)
 
-    def __del__(self):
-        cleanup_hw()
+    @classmethod
+    def descrip(cls):
+        return 'bbsr: Bit Banged Shift Register'
 
     def __str__(self):
-         return 'bbsr: Bit Banged Shift Register'
+        return 'bbsr: Bit Banged Shift Register'
+
+    def __del__(self):
+        cleanup_hw()
 
 
 class VC_SIM(ValveController):
@@ -179,11 +194,15 @@ class VC_SIM(ValveController):
         pins = [pin for pin in self.pins.itervalues()]
         gp_cleanup(pins)
 
-    def __del__(self):
-        cleanup_hw()
+    @classmethod
+    def descrip(cls):
+        return 'vc_sim: Simulated Valve Controller sans hardware'
 
     def __str__(self):
         return 'vc_sim: Simulated Valve Controller sans hardware'
+
+    def __del__(self):
+        cleanup_hw()
 
     def _write0(self,pin):
         gp_write(pin,0)
