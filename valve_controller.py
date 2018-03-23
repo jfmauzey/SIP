@@ -175,6 +175,38 @@ class BBSR(ValveController):
 
 class VC_SIM(ValveController):
     """
+    VC_SIM does not affect any hardware IO. 
+      This simulator can be used for:
+      Platforms that do not have IO.
+      Can be used for testing.
+      Can be used for training to learn how use the SIP app.
+         How programs schedule stations.
+         How programs multiple programs behave when using seq or concurrent mode.
+         How manual mode interacts with program scheduling.
+    """
+
+    def __init__(self,nst=8, alr = False, quiet = False):
+        super(VC_SIM, self).__init__(nst, alr, quiet)
+
+    def cleanup_hw(self):
+        pins = {}
+
+    @classmethod
+    def descrip(cls):
+        return 'vc_sim: Simulated Valve Controller sans hardware'
+
+    def __str__(self):
+        return 'vc_sim: Simulated Valve Controller sans hardware'
+
+    def __del__(self):
+        cleanup_hw()
+
+    def set_output(self,vals):
+        pass
+
+
+class VC_DEEP_SIM(ValveController):
+    """
     VC_SIM uses four simulated pins to allow the SIP application to run on
     any platform:
       Platforms that do not have IO.
@@ -279,5 +311,7 @@ vc_types = {
     'vc_sim' : VC_SIM
     }
 
+if gv.platform == 'nt':
+    vc_types['vc_deep_sim'] = VC_DEEP_SIM
 
-__all__ = ['BBSR', 'VC_SIM', 'vc_types']
+__all__ = ['BBSR', 'VC_SIM', 'VC_DEEP_SIM', 'vc_types']
