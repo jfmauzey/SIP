@@ -228,10 +228,10 @@ class VC_DEEP_SIM(ValveController):
 
     @classmethod
     def descrip(cls):
-        return 'vc_sim: Simulated Valve Controller sans hardware'
+        return 'vc_deep_sim: Simulated gpio Valve Controller sans hardware'
 
     def __str__(self):
-        return 'vc_sim: Simulated Valve Controller sans hardware'
+        return 'vc_deep_sim: Simulated gpio Valve Controller sans hardware'
 
     def __del__(self):
         cleanup_hw()
